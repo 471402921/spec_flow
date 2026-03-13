@@ -83,7 +83,7 @@ Tech Pack 只记录**约束和决策**。字段设计、接口参数、测试代
 | D-11 | 邮件发送方案：自建 SMTP？第三方邮件服务（SendGrid、AWS SES）？先用日志模拟？ | P2 先用日志模拟（打印验证链接到日志），邮件服务选型单独评审。定义 `EmailService` 接口，后续替换实现。 | 待确认 |
 | D-12 | 验证令牌生成方式：UUID？JWT？自定义随机串？ | UUID（`SecureRandom` 生成的 URL-safe 随机串），不用 JWT（无需自验证，DB 查询即可）。 | 待确认 |
 | D-13 | 验证链接的前端 URL 格式？ | 后端只生成 token，前端拼接完整链接。后端提供 `POST /verify-email` 接口接收 token。 | 待确认 |
-| D-14 | 注销后 30 天物理清除：定时任务（Spring Scheduler）还是依赖外部调度？ | 使用 Spring `@Scheduled` 定时任务（soulpal-worker 模块），每日凌晨执行。 | 待确认 |
+| D-14 | 注销后 30 天物理清除：定时任务（Spring Scheduler）还是依赖外部调度？ | 使用 Spring `@Scheduled` 定时任务（specflow-worker 模块），每日凌晨执行。 | 待确认 |
 | D-15 | 注销的用户邮箱是否释放（让其他人可注册）？ | 不释放。邮箱在软删除期间仍占用唯一约束。30 天物理清除后才释放。 | 待确认 |
 | D-16 | 账号锁定计数是否需要持久化到 Redis？ | 不需要。100 万用户规模下，直接用 DB 字段（`failed_login_attempts`）即可。Redis 引入增加复杂度，收益不大。 | 待确认 |
 
@@ -241,7 +241,7 @@ Tech Pack 只记录**约束和决策**。字段设计、接口参数、测试代
 P2 的代码主要是对 P0 `user` 模块的扩展，不新建模块：
 
 ```
-soulpal-api/src/main/java/com/soulpal/api/modules/
+specflow-api/src/main/java/com/specflow/api/modules/
 ├── user/
 │   ├── interfaces/
 │   │   ├── UserController.java              # 修改：增加 verify-email、forgot-password 等端点
@@ -265,7 +265,7 @@ soulpal-api/src/main/java/com/soulpal/api/modules/
 │           └── email/
 │               └── LogEmailService.java      # 新建：日志模拟邮件发送（后续替换）
 
-soulpal-worker/src/main/java/com/soulpal/worker/
+specflow-worker/src/main/java/com/specflow/worker/
 └── scheduler/
     └── AccountCleanupScheduler.java          # 新建：30天过期数据清理定时任务
 ```

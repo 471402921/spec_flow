@@ -48,7 +48,7 @@ DDD light 在当前阶段是 **性价比最高的工程解法**。
 #### 2.1.2 明确四层结构（强约束）
 
 ```
-com.soulpal.api.modules.{模块名}/
+com.specflow.api.modules.{模块名}/
 ├── interfaces/       # HTTP / WebSocket / DTO / 协议适配
 ├── application/      # UseCase / 事务边界 / 业务编排
 ├── domain/           # 实体 / 值对象 / 领域规则
@@ -125,15 +125,15 @@ com.soulpal.api.modules.{模块名}/
 ### 4.1 Maven 多模块结构
 
 ```
-soulpal-service/
+specflow-service/
 ├── pom.xml                              # 父 POM（依赖版本管理）
-├── soulpal-api/                         # API 服务模块
+├── specflow-api/                         # API 服务模块
 │   ├── pom.xml
 │   └── src/
 │       ├── main/
 │       │   ├── java/
-│       │   │   └── com/soulpal/api/
-│       │   │       ├── SoulpalApiApplication.java
+│       │   │   └── com/specflow/api/
+│       │   │       ├── SpecflowApiApplication.java
 │       │   │       ├── config/          # Spring 配置类
 │       │   │       ├── common/          # 通用组件（异常处理、响应封装）
 │       │   │       └── modules/
@@ -165,14 +165,14 @@ soulpal-service/
 │       │       ├── application-dev.yml
 │       │       └── db/migration/        # Flyway 迁移脚本
 │       └── test/
-├── soulpal-worker/                      # Worker 服务模块
+├── specflow-worker/                      # Worker 服务模块
 │   ├── pom.xml
 │   └── src/
-├── soulpal-common/                      # 共享代码模块
+├── specflow-common/                      # 共享代码模块
 │   ├── pom.xml
 │   └── src/
 │       └── main/java/
-│           └── com/soulpal/common/
+│           └── com/specflow/common/
 │               ├── exception/           # 通用异常定义
 │               ├── result/              # 统一响应封装
 │               └── util/                # 工具类
@@ -185,9 +185,9 @@ soulpal-service/
 ### 4.2 模块依赖关系
 
 ```
-soulpal-api ──────┬──> soulpal-common
+specflow-api ──────┬──> specflow-common
                   │
-soulpal-worker ───┘
+specflow-worker ───┘
 ```
 
 ---
@@ -216,7 +216,7 @@ soulpal-worker ───┘
 
 ```java
 // domain/entity/Session.java
-package com.soulpal.api.modules.auth.domain.entity;
+package com.specflow.api.modules.auth.domain.entity;
 
 import java.time.Instant;
 
@@ -244,7 +244,7 @@ public class Session {
 
 ```java
 // application/AuthService.java
-package com.soulpal.api.modules.auth.application;
+package com.specflow.api.modules.auth.application;
 
 @Service
 @RequiredArgsConstructor
@@ -275,7 +275,7 @@ public class AuthService {
 
 ```java
 // infrastructure/persistence/SessionRepositoryImpl.java
-package com.soulpal.api.modules.auth.infrastructure.persistence;
+package com.specflow.api.modules.auth.infrastructure.persistence;
 
 @Repository
 @RequiredArgsConstructor

@@ -55,7 +55,7 @@ Mac（开发主机 + ClaudeCode）
 - Docker Engine / Docker Compose（在 WSL 内运行，已部署）
 - cloudflared（Tunnel 客户端，以 systemd 服务常驻）
 - SSH Server（用于运维执行）
-- 运行目录：`/srv/soulpal-service`
+- 运行目录：`/srv/specflow-service`
 - 用户：`ssccddjjjj`
 
 ### 2.4 Docker Compose（应用运行层）
@@ -78,17 +78,17 @@ Mac（开发主机 + ClaudeCode）
 
 ### 3.2 Cloudflare Tunnel 路由策略
 - 每个 hostname 映射到 WSL 内的某个本地端口，例如：
-  - `api.soulpal.me` → `http://localhost:8080`
-  - `ws.soulpal.me`  → `http://localhost:8080`（同服务同端口也可）
+  - `api.specflow.me` → `http://localhost:8080`
+  - `ws.specflow.me`  → `http://localhost:8080`（同服务同端口也可）
 - 默认兜底为 404（避免误暴露）
 
 ## 3.3 实际部署配置（已实施）
 | 配置项 | 值 |
 |--------|-----|
-| 域名 | `soulpal.me` |
+| 域名 | `specflow.me` |
 | Tunnel 名称 | `home-dev` |
 | Tunnel ID | `b123f8b2-f3ac-4cfc-9b30-a07a0aec753d` |
-| DNS 记录 | `api.soulpal.me` CNAME → `b123f8b2-f3ac-4cfc-9b30-a07a0aec753d.cfargotunnel.com` |
+| DNS 记录 | `api.specflow.me` CNAME → `b123f8b2-f3ac-4cfc-9b30-a07a0aec753d.cfargotunnel.com` |
 | 本地服务 | `http://localhost:8080`（Spring Boot 默认端口）|
 | 配置文件 | `/etc/cloudflared/config.yml` |
 | 凭证文件 | `/etc/cloudflared/b123f8b2-f3ac-4cfc-9b30-a07a0aec753d.json` |
@@ -96,14 +96,14 @@ Mac（开发主机 + ClaudeCode）
 | **SSH 配置** | `~/.ssh/config` 中 `HostName` 指向 Tailscale IP |
 
 ### 验证方式
-- 浏览器访问 `https://api.soulpal.me/cdn-cgi/trace` 可查看 Cloudflare 连接信息
+- 浏览器访问 `https://api.specflow.me/cdn-cgi/trace` 可查看 Cloudflare 连接信息
 - 返回 `colo=SJC` 等字段表示 Tunnel 连接正常
 
 ## 3.4 Docker Compose 部署配置（已实施）
 
 | 配置项 | 值 |
 |--------|-----|
-| 项目路径 | `/srv/soulpal-service` |
+| 项目路径 | `/srv/specflow-service` |
 | Compose 文件 | `deploy/docker-compose.yml` |
 | 构建文件 | `deploy/Dockerfile`（multi-stage: JDK 21 build + JRE 21 runtime）|
 | 环境变量 | `deploy/.env`（基于 `.env.example` 创建，有默认值可省略）|
@@ -112,9 +112,9 @@ Mac（开发主机 + ClaudeCode）
 
 | 容器 | 镜像 | 端口 | 状态 |
 |------|------|------|------|
-| soulpal-postgres | postgres:16 | 5432 | ✅ Healthy |
-| soulpal-redis | redis:7-alpine | 6379 | ✅ Healthy |
-| soulpal-api | 本地构建 | 8080 | ✅ Running |
+| specflow-postgres | postgres:16 | 5432 | ✅ Healthy |
+| specflow-redis | redis:7-alpine | 6379 | ✅ Healthy |
+| specflow-api | 本地构建 | 8080 | ✅ Running |
 
 **Docker 镜像加速器**（中国网络必需）:
 ```json
@@ -202,14 +202,14 @@ tailscale ip -4
 1. Mac：开发完成并 push 到 GitHub
 2. Mac（ClaudeCode 通过 `ssh home-node`）在远端执行：
    ```bash
-   ssh home-node "cd /srv/soulpal-service && git pull origin main && cd deploy && docker compose up -d --build"
+   ssh home-node "cd /srv/specflow-service && git pull origin main && cd deploy && docker compose up -d --build"
    ```
 3. 验证：
    ```bash
    # 本地验证
    ssh home-node "curl http://localhost:8080/actuator/health"
    # 公网验证
-   curl https://api.soulpal.me/actuator/health
+   curl https://api.specflow.me/actuator/health
    ```
 4. Cloudflare Tunnel 持续在线，对外域名不变
 
@@ -300,9 +300,9 @@ tailscale ip -4
 ## 11. 部署实施记录
 
 ### 已完成（2026-02-06）
-- ✅ Cloudflare Tunnel 配置完成（`api.soulpal.me` → `localhost:8080`）
+- ✅ Cloudflare Tunnel 配置完成（`api.specflow.me` → `localhost:8080`）
 - ✅ Docker Compose 部署完成（postgres + redis + api）
-- ✅ 公网 HTTPS 访问正常（`https://api.soulpal.me/actuator/health`）
+- ✅ 公网 HTTPS 访问正常（`https://api.specflow.me/actuator/health`）
 - ✅ GitHub SSH 认证配置完成（home-node → GitHub）
 
 ### 部署中遇到的关键问题

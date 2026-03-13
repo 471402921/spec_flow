@@ -1,5 +1,5 @@
 -- =============================================
--- SoulPal Service - User Module P0
+-- SpecFlow Service - User Module P0
 -- Version: 1.1
 -- Description: 创建 users 表和 pets 表
 -- =============================================

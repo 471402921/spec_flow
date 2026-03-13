@@ -35,7 +35,7 @@ public class SessionTokenProvider implements TokenProvider {
     /**
      * 会话过期天数配置（从配置文件读取）
      */
-    @Value("${soulpal.session.expiration-days:30}")
+    @Value("${specflow.session.expiration-days:30}")
     private int sessionExpirationDays;
 
     @Override

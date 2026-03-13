@@ -221,7 +221,7 @@ Tech Pack 只记录**约束和决策**。字段设计、接口参数、测试代
 ## 6. 代码组织（模块结构）
 
 ```
-soulpal-api/src/main/java/com/soulpal/api/
+specflow-api/src/main/java/com/specflow/api/
 ├── modules/
 │   ├── auth/                          # 已有
 │   ├── user/                          # P0 已实现

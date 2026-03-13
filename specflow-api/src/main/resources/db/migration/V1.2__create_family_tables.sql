@@ -1,5 +1,5 @@
 -- =============================================
--- SoulPal Service - Family Module P1
+-- SpecFlow Service - Family Module P1
 -- Version: 1.2
 -- Description: 创建家庭相关表（families, family_members, family_invitations）
 -- =============================================

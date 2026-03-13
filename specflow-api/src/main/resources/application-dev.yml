@@ -6,8 +6,8 @@ spring:
 
   # 开发环境数据库配置（支持环境变量覆盖）
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:soulpal}
-    username: ${DB_USER:soulpal}
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:specflow}
+    username: ${DB_USER:specflow}
     password: ${DB_PASSWORD:changeme}
 
 # 开发环境日志级别

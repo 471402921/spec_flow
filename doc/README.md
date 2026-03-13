@@ -34,7 +34,7 @@ doc/
 
 ### reviews/ - 文档审核报告
 
-每次完成重大阶段后，通过 `/soulpal-doc-review` 技能生成的系统性文档审核报告。
+每次完成重大阶段后，通过 `/specflow-doc-review` 技能生成的系统性文档审核报告。
 
 **内容包括**:
 - 本次工作摘要
@@ -56,7 +56,7 @@ doc/
 
 ## 相关文档
 
-- 核心计划文档: [soulpal_plan/](../soulpal_plan/)
+- 核心计划文档: [specflow_plan/](../specflow_plan/)
 - 部署实录: [deploy/](../deploy/)
-- 架构设计: [soulpal_plan/工程架构方案定稿（DDD light）.md](../soulpal_plan/工程架构方案定稿（DDD%20light）.md)
-- 项目进度: [soulpal_plan/项目启动记录.md](../soulpal_plan/项目启动记录.md)
+- 架构设计: [specflow_plan/工程架构方案定稿（DDD light）.md](../specflow_plan/工程架构方案定稿（DDD%20light）.md)
+- 项目进度: [specflow_plan/项目启动记录.md](../specflow_plan/项目启动记录.md)

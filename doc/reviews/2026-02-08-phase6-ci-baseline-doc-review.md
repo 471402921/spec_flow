@@ -98,7 +98,7 @@ Job 3: package (JAR 打包验证，~5秒)
 |-------|---------|---------|------|
 | CI 工作流路径 | `.github/workflows/ci.yml` | SOP.md 第 370 行 | ✅ 一致 |
 | Checkstyle 规则 | `config/checkstyle.xml` | SOP.md 第 291 行 | ✅ 一致 |
-| 测试配置 | `soulpal-api/src/test/resources/application-test.yml` | SOP.md 阶段 5 | ✅ 一致 |
+| 测试配置 | `specflow-api/src/test/resources/application-test.yml` | SOP.md 阶段 5 | ✅ 一致 |
 
 ### 3.3 数据准确性 ✅
 
@@ -137,7 +137,7 @@ Job 3: package (JAR 打包验证，~5秒)
 **当前架构特点**:
 - 开发环境（Mac）+ 部署环境（home-node）分离
 - CI 在 GitHub Actions 云端运行
-- 部署仍为手动触发（`ssh home-node "cd /srv/soulpal-service/deploy && bash deploy.sh"`）
+- 部署仍为手动触发（`ssh home-node "cd /srv/specflow-service/deploy && bash deploy.sh"`）
 
 **后续演进方向**:
 1. **自动部署触发**: main 分支 CI 通过后，自动触发 deploy.sh（需配置 GitHub Secrets 存储 SSH 密钥）
@@ -192,7 +192,7 @@ Job 3: package (JAR 打包验证，~5秒)
      ### 4.2 部署流程（当前为手动触发）
      - 代码合并到 main 后，在 Mac 执行：
        ```bash
-       ssh home-node "cd /srv/soulpal-service/deploy && bash deploy.sh"
+       ssh home-node "cd /srv/specflow-service/deploy && bash deploy.sh"
        ```
      - deploy.sh 执行步骤：
        1. git pull origin main
@@ -281,21 +281,21 @@ Job 3: package (JAR 打包验证，~5秒)
 
 ## 附录：审查元数据
 
-**审查工具**: `/soulpal-doc-review` skill
+**审查工具**: `/specflow-doc-review` skill
 **审查时间**: 2026-02-08
 **审查范围**: Phase 6 - GitHub Actions CI baseline
 **审查人**: Claude Code (Sonnet 4.5)
 
 **扫描的文档列表**:
 1. [`project_plan/项目启动SOP.md`](../../project_plan/项目启动SOP.md) (第 360-580 行)
-2. `.claude/projects/-Users-dujunjie-development-soulpal-service/memory/MEMORY.md`
+2. `.claude/projects/-Users-dujunjie-development-specflow-service/memory/MEMORY.md`
 3. [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml)
 4. [`deploy/deploy.sh`](../../deploy/deploy.sh)
 5. Git 提交历史（最近 10 条）
 
 **扫描的代码文件**:
 - `pom.xml` (父 POM，插件配置)
-- `soulpal-api/src/test/resources/application-test.yml` (H2 测试配置)
+- `specflow-api/src/test/resources/application-test.yml` (H2 测试配置)
 
 **审查方法**:
 - 静态文档扫描（Read + Grep 工具）

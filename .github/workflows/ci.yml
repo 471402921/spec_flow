@@ -86,5 +86,5 @@ jobs:
 
       - name: Verify JAR files exist
         run: |
-          ls -lh soulpal-api/target/*.jar
-          ls -lh soulpal-worker/target/*.jar
+          ls -lh specflow-api/target/*.jar
+          ls -lh specflow-worker/target/*.jar

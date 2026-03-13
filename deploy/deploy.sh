@@ -1,7 +1,7 @@
 #!/bin/bash
 # =============================================
 # SpecFlow Service 部署脚本
-# 用途: 在 home-node 上快速部署应用
+# 用途: 在服务器上快速部署应用
 # =============================================
 
 set -e  # 遇到错误立即退出
@@ -10,10 +10,12 @@ echo "🚀 开始部署 SpecFlow Service..."
 
 # 1. 拉取最新代码
 echo "📥 拉取最新代码..."
+cd "$(dirname "$0")/.."
 git pull origin main
 
 # 2. 停止现有服务
 echo "🛑 停止现有服务..."
+cd deploy
 docker compose down
 
 # 3. 构建并启动服务
@@ -35,8 +37,9 @@ if [ -n "$HEALTH_STATUS" ]; then
     docker compose ps
     echo ""
     echo "🌐 访问地址："
-    echo "   - 本地: http://localhost:8080/swagger-ui/index.html"
-    echo "   - 公网: https://api.specflow.dev/swagger-ui/index.html"
+    echo "   - API: http://localhost:8080"
+    echo "   - Swagger UI: http://localhost:8080/swagger-ui/index.html"
+    echo "   - Health: http://localhost:8080/actuator/health"
 else
     echo "❌ 部署失败：健康检查未通过"
     echo ""

@@ -6,5 +6,5 @@
 .claude
 .DS_Store
 **/target
-soulpal_plan
+specflow_plan
 deploy/2026-*

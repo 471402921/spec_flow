@@ -2,6 +2,12 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## What is SpecFlow
+
+SpecFlow is a **Spec-Driven / Agentic Engineering** development framework — an opinionated scaffold for building Java backend services using DDD Light architecture, with AI-native development workflow (PRD → Tech Pack → Implementation → Review) baked in via Claude Code skills.
+
+The `user`, `auth`, and `family` modules are **showcase examples** demonstrating the framework's architecture and conventions.
+
 ## Build & Test Commands
 
 ```bash
@@ -9,7 +15,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ./mvnw clean package -DskipTests
 
 # Build specific module
-./mvnw package -pl soulpal-api -am
+./mvnw package -pl specflow-api -am
 
 # Run all tests (uses H2 in-memory DB, no external services needed)
 ./mvnw clean test
@@ -29,18 +35,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Architecture: DDD Light Modular Monolith
 
-Java 21 + Spring Boot 3.4.2 + Maven multi-module. Three modules: `soulpal-api` (REST service), `soulpal-worker` (async tasks, placeholder), `soulpal-common` (shared code). Current business modules in `soulpal-api`: `auth` (sessions/tokens), `user` (users, pets, verification), `family` (families, members, invitations).
+Java 21 + Spring Boot 3.4.2 + Maven multi-module. Three modules: `specflow-api` (REST service), `specflow-worker` (async tasks, placeholder), `specflow-common` (shared code).
 
 ### Shared Infrastructure
 
-- **`soulpal-common`**: `Result<T>` unified response wrapper, exception hierarchy (`BusinessException`, `NotFoundException`, `AuthenticationException`)
-- **`soulpal-api/config/`**: `GlobalExceptionHandler` (maps exceptions → `Result<T>` with HTTP status), `TraceIdInterceptor` (MDC-based `traceId` injected into all logs and `X-Trace-Id` response header), `AuthInterceptor` (Bearer token validation), `SecurityConfig` (BCrypt password encoder), `OpenApiConfig`. Both interceptors registered in `WebConfig`
+- **`specflow-common`**: `Result<T>` unified response wrapper, exception hierarchy (`BusinessException`, `NotFoundException`, `AuthenticationException`)
+- **`specflow-api/config/`**: `GlobalExceptionHandler` (maps exceptions → `Result<T>` with HTTP status), `TraceIdInterceptor` (MDC-based `traceId` injected into all logs and `X-Trace-Id` response header), `AuthInterceptor` (Bearer token validation), `SecurityConfig` (BCrypt password encoder), `OpenApiConfig`. Both interceptors registered in `WebConfig`
 - All controllers return `Result<T>` — use `Result.success(data)` / `Result.failure(code, msg)`
-- Business config namespace: `soulpal.*` (e.g. `soulpal.session.expiration-days`)
+- Business config namespace: `specflow.*` (e.g. `specflow.session.expiration-days`)
 
-### Module Layout (per business module in soulpal-api)
+### Module Layout (per business module in specflow-api)
 
-Each business module under `soulpal-api/src/main/java/com/soulpal/api/modules/{module}/` follows four layers:
+Each business module under `specflow-api/src/main/java/com/specflow/api/modules/{module}/` follows four layers:
 
 ```
 interfaces/          # Controllers, DTOs (Request/Response)
@@ -87,11 +93,11 @@ GitHub Actions (`.github/workflows/ci.yml`): three sequential jobs — checkstyl
 
 ## Deployment
 
-- Target: home-node (WSL2/Ubuntu) via `ssh home-node`
 - Docker Compose in `deploy/`: postgres:16, redis:7-alpine, api
-- Deploy: `ssh home-node "cd /srv/soulpal-service/deploy && bash deploy.sh"` (git pull → compose down → rebuild → health check)
-- Public access: `api.soulpal.me` via Cloudflare Tunnel
+- Deploy script: `deploy/deploy.sh` (git pull → compose down → rebuild → health check)
+- HTTPS via Nginx + Let's Encrypt (see `deploy/RUNBOOK.md` for Nginx config template)
 - Docker services use healthcheck dependencies (api waits for postgres + redis to be healthy)
+- Operational runbook: `deploy/RUNBOOK.md`
 
 ## Testing Conventions
 
@@ -103,20 +109,20 @@ GitHub Actions (`.github/workflows/ci.yml`): three sequential jobs — checkstyl
 
 ## Database Migrations
 
-Flyway migrations in `soulpal-api/src/main/resources/db/migration/V*.sql`. Baseline-on-migrate enabled for existing databases. PostgreSQL tables use a trigger for auto-updating `updated_at` columns; the H2 test schema (`schema-h2.sql`) omits triggers and simplifies indexes for compatibility. **When adding a new Flyway migration, always update `schema-h2.sql` to keep tests in sync.**
+Flyway migrations in `specflow-api/src/main/resources/db/migration/V*.sql`. Baseline-on-migrate enabled for existing databases. PostgreSQL tables use a trigger for auto-updating `updated_at` columns; the H2 test schema (`schema-h2.sql`) omits triggers and simplifies indexes for compatibility. **When adding a new Flyway migration, always update `schema-h2.sql` to keep tests in sync.**
 
 ## Development Skills (Claude Code)
 
 Custom skills available via slash commands:
 
-- `/soulpal-code-review` — Architecture compliance, Spring Boot practices, type safety, security
-- `/soulpal-test-gen` — Auto-generate unit + integration tests for a business module
-- `/soulpal-doc-prd` — Write or review PRD-Lite documents
-- `/soulpal-doc-techpack` — Generate Tech Pack from finalized PRD
-- `/soulpal-doc-review` — Cross-document completeness and consistency check
-- `/soulpal-module-gen` — Scaffold a new business module from Tech Pack (DDD Light 4-layer structure)
-- `/soulpal-deploy` — Deployment operations: deploy, status, logs, restart, rollback, DB backup
+- `/specflow-code-review` — Architecture compliance, Spring Boot practices, type safety, security
+- `/specflow-test-gen` — Auto-generate unit + integration tests for a business module
+- `/specflow-doc-prd` — Write or review PRD-Lite documents
+- `/specflow-doc-techpack` — Generate Tech Pack from finalized PRD
+- `/specflow-doc-review` — Cross-document completeness and consistency check
+- `/specflow-module-gen` — Scaffold a new business module from Tech Pack (DDD Light 4-layer structure)
+- `/specflow-deploy` — Deployment operations: deploy, status, logs, restart, rollback, DB backup
 
 ## Development Workflow
 
-The project follows a 4-stage AI-automation workflow documented in `doc/process/ai-automation-dev-workflow.md`: PRD-Lite → Tech Pack → Implementation → Review. Requirements live in `doc/requirements/`, designs in `doc/design/{module}/`. Operational runbook at `deploy/RUNBOOK.md`.
+The project follows a 4-stage AI-automation workflow documented in `doc/process/ai-automation-dev-workflow.md`: PRD-Lite → Tech Pack → Implementation → Review. Requirements live in `doc/requirements/`, designs in `doc/design/{module}/`.

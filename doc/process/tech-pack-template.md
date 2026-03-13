@@ -133,7 +133,7 @@ Tech Pack 只记录**约束和决策**。字段设计、接口参数、测试代
 > 说明本批次的代码结构和模块划分，以及对已有代码的改造点。
 
 ```
-soulpal-api/src/main/java/com/soulpal/api/modules/
+specflow-api/src/main/java/com/specflow/api/modules/
 ├── <module>/
 │   ├── interfaces/
 │   │   ├── <Module>Controller.java

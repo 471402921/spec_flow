@@ -1,5 +1,5 @@
 -- =============================================
--- SoulPal Service - User Module P2 (Security Enhancement)
+-- SpecFlow Service - User Module P2 (Security Enhancement)
 -- Version: 1.3
 -- Description: 创建 verification_tokens 表，users 表增加安全相关字段
 -- =============================================

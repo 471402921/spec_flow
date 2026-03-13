@@ -2,7 +2,7 @@
 
 **执行时间**: 2026-02-07
 **审核范围**: Phase 4 数据库基础链路部署与验证
-**审核触发**: `/soulpal-doc-review` 技能
+**审核触发**: `/specflow-doc-review` 技能
 
 ---
 
@@ -17,14 +17,14 @@
 ### 关键修复
 **问题**: Docker 环境下应用无法连接数据库
 - **根因**: application-dev.yml 硬编码 `localhost:5432`
-- **修复**: 改为 `${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:soulpal}`
+- **修复**: 改为 `${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:specflow}`
 - **提交**: `1bae581` (fix: 修复 application-dev.yml 数据库连接配置)
 
 ### 验证结果
 - 数据库连接: ✅ PostgreSQL 16 连接正常
 - Flyway 迁移: ✅ V1.0__init_schema.sql 执行成功
 - Session API: ✅ 4 个接口全部测试通过
-- 公网访问: ✅ HTTPS (api.soulpal.me) 正常
+- 公网访问: ✅ HTTPS (api.specflow.me) 正常
 - Swagger UI: ✅ 文档正常显示
 
 ---
@@ -34,7 +34,7 @@
 | 文档 | 状态 | 更新内容 |
 |------|------|----------|
 | [项目启动SOP.md](../../project_plan/项目启动SOP.md) | ✅ 已更新 | 1. 补充问题 #5：Docker 环境数据库连接配置修复<br>2. 添加近期完成工作：修复配置 + 公网验证<br>3. 更新"下一步"为 Phase 5（移除"Phase 4 公网验证"） |
-| [MEMORY.md](../../.claude/projects/-Users-dujunjie-development-soulpal-service/memory/MEMORY.md) | ✅ 已更新 | 添加经验教训：Environment variable placeholders 使用规范 |
+| [MEMORY.md](../../.claude/projects/-Users-dujunjie-development-specflow-service/memory/MEMORY.md) | ✅ 已更新 | 添加经验教训：Environment variable placeholders 使用规范 |
 | [deploy/2026-02-07-phase4-database/](../../deploy/2026-02-07-phase4-database/) | 🆕 新建 | 创建完整的 Phase 4 部署实录（包含验证、问题、解决方案） |
 | 部署架构设计.md | ⏭️ 无需更新 | 基础设施配置无变更 |
 | DDD 架构方案.md | ⏭️ 无需更新 | 架构设计无变更，实施符合规范 |
@@ -47,10 +47,10 @@
 | 检查项 | 状态 | 说明 |
 |--------|------|------|
 | 端口号一致 | ✅ | 所有文档均使用 `8080` (API), `5432` (PostgreSQL), `6379` (Redis) |
-| 路径一致 | ✅ | 项目路径 `/srv/soulpal-service` 一致 |
+| 路径一致 | ✅ | 项目路径 `/srv/specflow-service` 一致 |
 | 版本号一致 | ✅ | PostgreSQL 16, Redis 7, Spring Boot 3.4.2, Java 21 |
 | 命令可用 | ✅ | 部署实录中的验证命令均已执行并通过 |
-| 域名一致 | ✅ | `api.soulpal.me` 在所有文档中一致 |
+| 域名一致 | ✅ | `api.specflow.me` 在所有文档中一致 |
 
 ---
 
@@ -181,7 +181,7 @@
 - 建立测试覆盖率基线
 
 ### 9.2 文档维护流程
-- 每完成一个 SOP 阶段，执行 `/soulpal-doc-review`
+- 每完成一个 SOP 阶段，执行 `/specflow-doc-review`
 - 保持部署实录的及时更新（deploy/ 目录）
 - 经验教训应同步更新到 MEMORY.md
 - 审核报告存放到 doc/reviews/ 目录
@@ -193,7 +193,7 @@
 grep -r "8080\|5432\|6379" project_plan/*.md deploy/*/*.md
 
 # 路径检查
-grep -r "/srv/soulpal-service" project_plan/*.md deploy/*/*.md
+grep -r "/srv/specflow-service" project_plan/*.md deploy/*/*.md
 
 # 版本号检查
 grep -r "postgres:16\|redis:7\|Spring Boot 3.4.2" project_plan/*.md
@@ -222,5 +222,5 @@ grep -r "postgres:16\|redis:7\|Spring Boot 3.4.2" project_plan/*.md
 ---
 
 **审核结论**: ✅ 所有文档已更新，一致性检查通过
-**审核工具**: `/soulpal-doc-review` 技能
+**审核工具**: `/specflow-doc-review` 技能
 **下一步**: Phase 5 测试与质量基线

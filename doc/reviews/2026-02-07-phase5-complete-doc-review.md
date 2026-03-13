@@ -2,7 +2,7 @@
 
 **执行时间**: 2026-02-07
 **审核范围**: Phase 5 测试与质量基线完成 + 代码审查修复
-**审核触发**: `/soulpal-doc-review` 技能
+**审核触发**: `/specflow-doc-review` 技能
 
 ---
 
@@ -12,7 +12,7 @@
 - ✅ Phase 5 测试基础设施配置完成（Checkstyle + JaCoCo + Maven Surefire）
 - ✅ 编写 SessionService 单元测试（9个测试用例，全部通过）
 - ✅ 编写 SessionController 集成测试（8个测试用例，全部通过）
-- ✅ 代码质量审查（通过 `/soulpal-code-review` 技能识别 4 个 WARNING）
+- ✅ 代码质量审查（通过 `/specflow-code-review` 技能识别 4 个 WARNING）
 - ✅ 修复全部质量问题（Boolean→boolean、配置外部化、异常保护、API文档）
 - ✅ 修复编译错误（Lombok getter 名称变化：getRevoked → isRevoked）
 - ✅ 修复测试失败（@Value 注入问题，使用 ReflectionTestUtils）
@@ -26,7 +26,7 @@
 | **合计** | - | **17** | **✅ 100% 通过** |
 
 ### 代码质量审查结果
-通过 `/soulpal-code-review` 技能发现并修复：
+通过 `/specflow-code-review` 技能发现并修复：
 
 | 问题级别 | 数量 | 修复状态 |
 |---------|------|---------|
@@ -48,7 +48,7 @@
    - 保护：`token.length() > 16 ? token.substring(0, 16) : token`
 
 4. **SPRING-002**: Session 过期天数硬编码在代码中
-   - 修复：提取到 application.yml 配置 `soulpal.session.expiration-days: 30`
+   - 修复：提取到 application.yml 配置 `specflow.session.expiration-days: 30`
    - 使用：SessionService 通过 @Value 注入
 
 ### 关键修复过程
@@ -74,7 +74,7 @@
 | 文档 | 状态 | 更新内容 |
 |------|------|----------|
 | [项目启动SOP.md](../../project_plan/项目启动SOP.md) | ✅ 已更新 | 1. 阶段 5 全部里程碑标记为完成<br>2. 添加问题 #6-8：代码审查、Lombok、测试修复<br>3. 更新近期工作：5 条 Phase 5 完成记录<br>4. 更新下一步为 Phase 6 或 Phase 7<br>5. 更新顶部进度清单（阶段 5 ✅） |
-| [MEMORY.md](../../.claude/projects/-Users-dujunjie-development-soulpal-service/memory/MEMORY.md) | ✅ 已更新 | 1. 更新 Progress：Phase 5 标记为完成<br>2. 添加 4 条新经验教训（Lombok、ReflectionTestUtils、Code Review、Primitive vs Wrapper） |
+| [MEMORY.md](../../.claude/projects/-Users-dujunjie-development-specflow-service/memory/MEMORY.md) | ✅ 已更新 | 1. 更新 Progress：Phase 5 标记为完成<br>2. 添加 4 条新经验教训（Lombok、ReflectionTestUtils、Code Review、Primitive vs Wrapper） |
 | [本审核报告](.) | 🆕 新建 | 完整记录 Phase 5 完成 + 代码审查修复全过程 |
 | 部署架构设计.md | ⏭️ 无需更新 | 基础设施无变更 |
 | DDD 架构方案.md | ⏭️ 无需更新 | 测试代码符合架构规范 |
@@ -86,7 +86,7 @@
 
 | 检查项 | 状态 | 说明 |
 |--------|------|------|
-| 配置一致性 | ✅ | application.yml 新增 `soulpal.session.expiration-days` 未冲突 |
+| 配置一致性 | ✅ | application.yml 新增 `specflow.session.expiration-days` 未冲突 |
 | 测试命名规范 | ✅ | 全部测试遵循 `methodName_scenario_expectedResult` 模式 |
 | 代码风格 | ✅ | Checkstyle 0 violations (Google Java Style) |
 | 测试覆盖率 | ✅ | JaCoCo 报告生成成功（target/site/jacoco/） |
@@ -98,39 +98,39 @@
 
 ### 生产代码修改（7 个文件）
 
-1. **soulpal-api/src/main/java/com/soulpal/api/modules/auth/domain/entity/Session.java**
+1. **specflow-api/src/main/java/com/specflow/api/modules/auth/domain/entity/Session.java**
    - 修改：`private Boolean revoked;` → `private boolean revoked;`
    - 行号：46
 
-2. **soulpal-api/src/main/resources/application.yml**
+2. **specflow-api/src/main/resources/application.yml**
    - 新增业务配置：
      ```yaml
-     soulpal:
+     specflow:
        session:
          expiration-days: 30
      ```
 
-3. **soulpal-api/src/main/java/com/soulpal/api/modules/auth/application/SessionService.java**
+3. **specflow-api/src/main/java/com/specflow/api/modules/auth/application/SessionService.java**
    - 新增 import: `org.springframework.beans.factory.annotation.Value`
-   - 新增字段：`@Value("${soulpal.session.expiration-days:30}") private int sessionExpirationDays;`
+   - 新增字段：`@Value("${specflow.session.expiration-days:30}") private int sessionExpirationDays;`
    - 修改：使用 sessionExpirationDays 变量（line 46）
    - 修改：添加 substring 长度检查（line 48, 93）
    - 修改：getRevoked() → isRevoked()（line 79）
 
-4. **soulpal-api/src/main/java/com/soulpal/api/modules/auth/interfaces/SessionController.java**
+4. **specflow-api/src/main/java/com/specflow/api/modules/auth/interfaces/SessionController.java**
    - 新增 import: `io.swagger.v3.oas.annotations.responses.ApiResponse`
    - 新增 import: `io.swagger.v3.oas.annotations.responses.ApiResponses`
    - 添加 @ApiResponses 到 4 个接口方法（createSession, getSession, validateSession, revokeSession）
 
-5. **soulpal-api/src/main/java/com/soulpal/api/modules/auth/infrastructure/persistence/converter/SessionConverter.java**
+5. **specflow-api/src/main/java/com/specflow/api/modules/auth/infrastructure/persistence/converter/SessionConverter.java**
    - 修改：getRevoked() → isRevoked()（line 50）
 
-6. **soulpal-api/src/main/java/com/soulpal/api/modules/auth/interfaces/dto/SessionResponse.java**
+6. **specflow-api/src/main/java/com/specflow/api/modules/auth/interfaces/dto/SessionResponse.java**
    - 修改：getRevoked() → isRevoked()（line 41）
 
 ### 测试代码修改（1 个文件）
 
-7. **soulpal-api/src/test/java/com/soulpal/api/modules/auth/application/SessionServiceTest.java**
+7. **specflow-api/src/test/java/com/specflow/api/modules/auth/application/SessionServiceTest.java**
    - 新增 import: `org.springframework.test.util.ReflectionTestUtils`
    - 在 @BeforeEach 添加：`ReflectionTestUtils.setField(sessionService, "sessionExpirationDays", 30);`
    - 修改：getRevoked() → isRevoked()（line 70, 170）
@@ -177,7 +177,7 @@
 ### 5.3 覆盖率报告
 ```bash
 ./mvnw clean test jacoco:report
-# 报告路径: soulpal-api/target/site/jacoco/index.html
+# 报告路径: specflow-api/target/site/jacoco/index.html
 # 结果: 成功生成
 ```
 
@@ -202,7 +202,7 @@
 - ✅ 已添加到 MEMORY.md
 
 ### 6.3 代码审查工作流
-- **工具**: `/soulpal-code-review` 技能
+- **工具**: `/specflow-code-review` 技能
 - **时机**: 在编写测试前先执行代码审查
 - **收益**: 提前发现 NPE 风险、配置硬编码、API 文档缺失等问题
 - **建议**: 每完成一个模块开发后立即执行
@@ -249,7 +249,7 @@
 - [ ] 配置备份策略（PostgreSQL 定期备份）
 
 ### 7.3 技术债务清理
-- [ ] 为 soulpal-common 编写测试（Result、异常类）
+- [ ] 为 specflow-common 编写测试（Result、异常类）
 - [ ] 为 SessionDO 和 SessionConverter 增加测试覆盖
 - [ ] 配置 SpotBugs / PMD 静态分析
 - [ ] 配置 OWASP Dependency Check
@@ -302,12 +302,12 @@
 
 ### 关键成就
 1. ✅ 建立完整的测试基础设施（单元 + 集成 + Checkstyle + JaCoCo）
-2. ✅ 验证了代码审查工作流（`/soulpal-code-review` 技能有效性）
+2. ✅ 验证了代码审查工作流（`/specflow-code-review` 技能有效性）
 3. ✅ 积累了重要的工程实践经验（Lombok、测试注入、类型选择）
-4. ✅ 实现了文档自动化同步（`/soulpal-doc-review` 技能）
+4. ✅ 实现了文档自动化同步（`/specflow-doc-review` 技能）
 
 ---
 
 **审核结论**: ✅ Phase 5 已完成，所有文档已更新，质量基线已建立
-**审核工具**: `/soulpal-doc-review` 技能
+**审核工具**: `/specflow-doc-review` 技能
 **下一步**: 选择 Phase 6（CI 基线）或 Phase 7（Runbook）继续推进

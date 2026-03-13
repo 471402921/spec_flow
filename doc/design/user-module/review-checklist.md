@@ -45,7 +45,7 @@
 | D-11 | 邮件发送方案：自建 SMTP？第三方服务？先用日志模拟？ | P2 先用日志模拟（打印验证链接到日志），定义 `EmailService` 接口后续替换实现。 | ✅ 已确认 |
 | D-12 | 验证令牌生成方式：UUID？JWT？自定义随机串？ | UUID（`SecureRandom` 生成的 URL-safe 随机串），不用 JWT（无需自验证，DB 查询即可）。 | ✅ 已确认 |
 | D-13 | 验证链接的前端 URL 格式？ | 后端只生成 token，前端拼接完整链接。后端提供 `POST /verify-email` 接口接收 token。 | ✅ 已确认 |
-| D-14 | 注销后 30 天物理清除：Spring Scheduler 还是外部调度？ | Spring `@Scheduled` 定时任务（soulpal-worker 模块），每日凌晨执行。 | ✅ 已确认 |
+| D-14 | 注销后 30 天物理清除：Spring Scheduler 还是外部调度？ | Spring `@Scheduled` 定时任务（specflow-worker 模块），每日凌晨执行。 | ✅ 已确认 |
 | D-15 | 注销的用户邮箱是否释放（让其他人可注册）？ | 不释放。邮箱在软删除期间仍占用唯一约束。30 天物理清除后才释放。 | ✅ 已确认 |
 | D-16 | 账号锁定计数是否需要持久化到 Redis？ | 不需要。100 万用户规模下直接用 DB 字段即可。Redis 增加复杂度，收益不大。 | ✅ 已确认 |
 
@@ -184,8 +184,8 @@
 | JAVA-002 | WARNING | Token 脱敏逻辑在多处重复 | 创建 `LogMasker` 工具类统一处理 | ✅ 已修复 |
 
 **新增文件**：
-- `soulpal-api/src/main/java/com/soulpal/api/config/SecurityConfig.java` - 安全配置类，定义 PasswordEncoder Bean
-- `soulpal-api/src/main/java/com/soulpal/api/util/LogMasker.java` - 日志脱敏工具类
+- `specflow-api/src/main/java/com/specflow/api/config/SecurityConfig.java` - 安全配置类，定义 PasswordEncoder Bean
+- `specflow-api/src/main/java/com/specflow/api/util/LogMasker.java` - 日志脱敏工具类
 
 **修改文件**：
 - `PetController.java` - 移除 `@ResponseStatus(HttpStatus.NO_CONTENT)`

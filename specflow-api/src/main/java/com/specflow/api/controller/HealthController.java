@@ -30,7 +30,7 @@ public class HealthController {
         log.warn("Warning log test");
 
         Map<String, Object> response = new HashMap<>();
-        response.put("message", "Hello from SoulPal API!");
+        response.put("message", "Hello from SpecFlow API!");
         response.put("timestamp", Instant.now().toString());
         response.put("version", "0.1.0-SNAPSHOT");
 
