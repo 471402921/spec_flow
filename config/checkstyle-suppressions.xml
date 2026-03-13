@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!DOCTYPE suppressions PUBLIC
+        "-//Checkstyle//DTD SuppressionFilter Configuration 1.2//EN"
+        "https://checkstyle.org/dtds/suppressions_1_2.dtd">
+
+<suppressions>
+    <!-- 排除生成的代码 -->
+    <suppress checks=".*" files="target[/\\].*"/>
+    <suppress checks=".*" files=".*[/\\]generated[/\\].*"/>
+
+    <!-- 测试代码放宽要求 -->
+    <suppress checks="MethodLength" files=".*Test\.java"/>
+    <suppress checks="MagicNumber" files=".*Test\.java"/>
+</suppressions>

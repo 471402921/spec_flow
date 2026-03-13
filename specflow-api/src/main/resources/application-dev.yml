@@ -1,0 +1,25 @@
+# 开发环境配置
+spring:
+  output:
+    ansi:
+      enabled: always
+
+  # 开发环境数据库配置（支持环境变量覆盖）
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:soulpal}
+    username: ${DB_USER:soulpal}
+    password: ${DB_PASSWORD:changeme}
+
+# 开发环境日志级别
+logging:
+  level:
+    root: INFO
+    com.specflow: DEBUG
+    org.springframework.web: DEBUG
+    org.mybatis: DEBUG
+
+# Actuator 在开发环境显示详细信息
+management:
+  endpoint:
+    health:
+      show-details: always

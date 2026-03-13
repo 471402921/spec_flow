@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: specflow-worker
+  main:
+    web-application-type: none

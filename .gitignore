@@ -1,0 +1,33 @@
+# Claude Code - Local user files
+.claude/*
+!.claude/skills/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+*.swp
+*.swo
+
+# IDE
+.vscode/
+.idea/
+*.iml
+*.iws
+
+# Java / Maven
+target/
+*.class
+*.jar
+*.war
+*.ear
+hs_err_pid*
+replay_pid*
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# OS
+Thumbs.db

@@ -1,0 +1,10 @@
+.git
+.gitignore
+.idea
+*.iml
+.vscode
+.claude
+.DS_Store
+**/target
+soulpal_plan
+deploy/2026-*
