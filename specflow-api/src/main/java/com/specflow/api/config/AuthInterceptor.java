@@ -1,6 +1,6 @@
 package com.specflow.api.config;
 
-import com.specflow.api.modules.user.domain.service.TokenProvider;
+import com.specflow.api.config.TokenProvider;
 import com.specflow.common.exception.AuthenticationException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -27,11 +27,8 @@ public class AuthInterceptor implements HandlerInterceptor {
 
     private final TokenProvider tokenProvider;
 
-    // 排除路径列表
+    // 排除路径列表（框架基础设施路径）
     private static final List<String> EXCLUDE_PATHS = List.of(
-            "/api/v1/users/register",
-            "/api/v1/users/login",
-            "/api/v1/sessions",
             "/actuator",
             "/swagger-ui",
             "/api-docs",

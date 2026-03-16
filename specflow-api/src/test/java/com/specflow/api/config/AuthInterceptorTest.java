@@ -1,6 +1,6 @@
 package com.specflow.api.config;
 
-import com.specflow.api.modules.user.domain.service.TokenProvider;
+import com.specflow.api.config.TokenProvider;
 import com.specflow.common.exception.AuthenticationException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

@@ -83,9 +83,3 @@ flyway:
   locations: classpath:db/migration
   encoding: UTF-8
   validate-on-migrate: true
-
-# 业务配置
-specflow:
-  session:
-    # 会话过期天数
-    expiration-days: 30
