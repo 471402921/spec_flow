@@ -121,4 +121,4 @@ Custom skills available via slash commands:
 
 ## Development Workflow
 
-The project follows a 4-stage AI-automation workflow documented in `doc/process/ai-automation-dev-workflow.md`: PRD-Lite → Tech Pack → Implementation → Review. Requirements live in `doc/requirements/`, designs in `doc/design/{module}/`.
+The project follows a 4-stage AI-automation workflow documented in `doc/README.md`: PRD-Lite → Tech Pack → Implementation → Review. Requirements live in `doc/requirements/`, designs in `doc/design/{module}/`.

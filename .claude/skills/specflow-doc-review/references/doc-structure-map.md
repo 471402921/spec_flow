@@ -4,8 +4,7 @@
 
 ```
 doc/
-├── process/                          # 流程规范（SOP）
-│   └── ai-automation-dev-workflow.md  # 四阶段 SOP
+├── README.md                          # 文档索引 + 四阶段 SOP
 ├── requirements/                      # 需求文档
 │   └── <module>-prd.md                # 各模块 PRD（如 user-module-prd.md）
 ├── design/                            # 设计文档（按模块分子目录）
@@ -24,11 +23,11 @@ CLAUDE.md                             # 项目级 AI 指令
 
 ## 各文档预期规格
 
-### 流程规范 (`doc/process/`)
+### 流程规范（集成在 `doc/README.md` 中）
 
-| 文档 | 必须存在 | 预期内容 |
-|------|---------|---------|
-| `ai-automation-dev-workflow.md` | 是 | 四阶段 SOP（A→B→C→D），版本号 >= v0.4 |
+| 检查项 | 必须存在 | 预期内容 |
+|--------|---------|---------|
+| 四阶段 SOP | 是 | `doc/README.md` 中包含 AI 自动化开发流程章节，版本号 >= v0.4 |
 
 ### 模板文件（位于 skill references 中）
 
@@ -75,4 +74,4 @@ CLAUDE.md                             # 项目级 AI 指令
 | 镜像版本 | `deploy/docker-compose.yml` |
 | Java/Spring Boot 版本 | `pom.xml`、CLAUDE.md |
 | 部署命令 | MEMORY.md、CLAUDE.md、`deploy/RUNBOOK.md` |
-| 模块执行状态 | `ai-automation-dev-workflow.md` §8、实际文件存在性 |
+| 模块执行状态 | `doc/README.md` SOP 章节、实际文件存在性 |

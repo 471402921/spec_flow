@@ -5,7 +5,7 @@
 > 状态：`草稿 / 定稿`
 > 更新时间：`YYYY-MM-DD`
 > 负责人：`产品&UI&UE`
-> 基于流程：`doc/process/ai-automation-dev-workflow.md`
+> 基于流程：`doc/README.md`
 
 ---
 
