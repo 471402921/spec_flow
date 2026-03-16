@@ -8,7 +8,7 @@
 doc/
 ├── README.md              # 本文件
 ├── design/                # 设计文档
-├── process/               # 流程方法论与模板
+├── process/               # 流程方法论（SOP）
 ├── requirements/          # 需求文档
 └── reviews/               # 文档审核报告
 ```
@@ -19,14 +19,12 @@ doc/
 
 存放开发过程中的技术设计文档，如数据库设计、接口设计、技术方案等。
 
-### process/ - 流程方法论与模板
+### process/ - 流程方法论
 
-存放团队协作流程、SOP、文档模板等方法论资产。
+存放团队协作流程、SOP 等方法论资产。模板文件已迁移至对应 Skill 的 `references/` 目录。
 
 **当前内容包括**:
 - AI 自动化开发流程（小团队极简版）
-- PRD-Lite 模板
-- Tech Pack 模板
 
 ### requirements/ - 需求文档
 
@@ -56,7 +54,5 @@ doc/
 
 ## 相关文档
 
-- 核心计划文档: [specflow_plan/](../specflow_plan/)
-- 部署实录: [deploy/](../deploy/)
-- 架构设计: [specflow_plan/工程架构方案定稿（DDD light）.md](../specflow_plan/工程架构方案定稿（DDD%20light）.md)
-- 项目进度: [specflow_plan/项目启动记录.md](../specflow_plan/项目启动记录.md)
+- 部署运维: [deploy/](../deploy/)
+- 项目架构: [CLAUDE.md](../CLAUDE.md)

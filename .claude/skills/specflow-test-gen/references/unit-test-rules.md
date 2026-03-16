@@ -196,8 +196,8 @@ class {Entity}Test {
     }
 
     @Test
-    @DisplayName("revoke - 取消后应标记为无效")
-    void revoke_shouldMarkAsInvalid() {
+    @DisplayName("cancel - 取消后应标记为无效")
+    void cancel_shouldMarkAsInvalid() {
         Order order = Order.create("user-123", "ORD-001", 30);
 
         order.cancel();
@@ -225,7 +225,7 @@ class {Entity}Test {
 |------|---------|---------|---------|
 | createXxx | 创建成功 | - | null 参数 |
 | getXxxById | 存在返回 | NotFoundException | - |
-| validateXxx | 有效返回 true | AuthenticationException | 刚过期/刚撤销 |
+| validateXxx | 有效返回 true | AuthenticationException | 刚过期/刚取消 |
 | deleteXxx | 删除成功 | NotFoundException | - |
 | updateXxx | 更新成功 | NotFoundException | 部分字段更新 |
 
@@ -235,11 +235,11 @@ class {Entity}Test {
 
 ```java
 // ✅ 好的命名
-createOrder_shouldReturnValidSession()
+createOrder_shouldReturnValidOrder()
 getOrderById_whenOrderExists_shouldReturnOrder()
 getOrderById_whenOrderNotExists_shouldThrowNotFoundException()
 validateOrder_whenOrderIsExpired_shouldThrowBusinessException()
-cancelOrder_shouldSuccessfullyRevoke()
+cancelOrder_shouldSuccessfullyCancel()
 
 // ❌ 差的命名
 test1()

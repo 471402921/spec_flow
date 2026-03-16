@@ -19,7 +19,7 @@ void setUp() {
 }
 ```
 
-**实际案例**: `OrderServiceTest` 中 `orderExpirationDays` 为 0，导致 `Order.create()` 创建的会话立即过期
+**实际案例**: `OrderServiceTest` 中 `orderExpirationDays` 为 0，导致 `Order.create()` 创建的订单立即过期
 
 ---
 
@@ -68,8 +68,8 @@ LocalDateTime.now().atZone(ZoneId.of("UTC")).toInstant();
 **在 Converter 中**:
 ```java
 // OrderConverter.java
-public static Session toDomain(OrderDO dataObject) {
-    session.setExpiredAt(dataObject.getExpiredAt()
+public static Order toDomain(OrderDO dataObject) {
+    order.setExpiredAt(dataObject.getExpiredAt()
             .atZone(ZoneId.of("UTC")).toInstant());  // 明确 UTC
 }
 ```
@@ -134,8 +134,8 @@ void setUp() {
 }
 
 // ❌ 错误：在类级别共享可变对象
-private Session mockOrder = Order.create("user-123", "token_abc", 30);
-// 如果某个测试调用了 mockOrder.revoke()，其他测试也会受影响
+private Order mockOrder = Order.create("user-123", "token_abc", 30);
+// 如果某个测试调用了 mockOrder.cancel()，其他测试也会受影响
 ```
 
 ---
@@ -149,16 +149,16 @@ private Session mockOrder = Order.create("user-123", "token_abc", 30);
 ```java
 // ❌ JUnit 原生断言
 import static org.junit.jupiter.api.Assertions.*;
-assertEquals("user-123", session.getUserId());
-assertTrue(session.isValid());
-assertNotNull(session.getToken());
+assertEquals("user-123", order.getUserId());
+assertTrue(order.isValid());
+assertNotNull(order.getOrderNo());
 assertThrows(NotFoundException.class, () -> service.getById("bad"));
 
 // ✅ AssertJ 断言
 import static org.assertj.core.api.Assertions.*;
-assertThat(session.getUserId()).isEqualTo("user-123");
-assertThat(session.isValid()).isTrue();
-assertThat(session.getToken()).isNotNull();
+assertThat(order.getUserId()).isEqualTo("user-123");
+assertThat(order.isValid()).isTrue();
+assertThat(order.getOrderNo()).isNotNull();
 assertThatThrownBy(() -> service.getById("bad"))
         .isInstanceOf(NotFoundException.class);
 ```
@@ -180,7 +180,7 @@ private String testToken = "token_abc123def456";
 @Test
 void getOrder_shouldReturnOrder() {
     when(repo.findByToken(testToken)).thenReturn(Optional.of(mockOrder));
-    Session result = service.getOrderById(testToken);
+    Order result = service.getOrderById(testToken);
     assertThat(result.getUserId()).isEqualTo(testUserId);
 }
 
@@ -188,7 +188,7 @@ void getOrder_shouldReturnOrder() {
 @Test
 void getOrder_shouldReturnOrder() {
     when(repo.findByToken("abc")).thenReturn(Optional.of(session));
-    Session result = service.getOrderById("abc");
+    Order result = service.getOrderById("abc");
     assertThat(result.getUserId()).isEqualTo("u1");
 }
 ```
@@ -203,7 +203,7 @@ void getOrder_shouldReturnOrder() {
 ```java
 // ✅ 正确：中文 DisplayName，失败时一眼看懂
 @Test
-@DisplayName("验证会话 - 会话已过期时应抛出认证异常")
+@DisplayName("验证订单 - 订单已过期时应抛出业务异常")
 void validateOrder_whenOrderIsExpired_shouldThrowBusinessException() { }
 
 // ❌ 错误：没有 DisplayName
@@ -222,13 +222,13 @@ void validateOrder_whenOrderIsExpired_shouldThrowBusinessException() { }
 ```java
 @Test
 void createOrder_shouldSaveToRepository() {
-    Session result = orderService.createOrder(testUserId);
+    Order result = orderService.createOrder(testUserId);
 
     // 不仅验证返回值
     assertThat(result).isNotNull();
 
     // 还要验证 Repository 被调用了
-    verify(orderRepository).save(any(Session.class));
+    verify(orderRepository).save(any(Order.class));
 }
 ```
 

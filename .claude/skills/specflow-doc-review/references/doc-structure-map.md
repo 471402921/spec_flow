@@ -4,11 +4,8 @@
 
 ```
 doc/
-├── process/                          # 流程规范（模板 + SOP）
-│   ├── ai-automation-dev-workflow.md  # 四阶段 SOP
-│   ├── prd-lite-template.md           # PRD-Lite 模板
-│   ├── tech-pack-template.md          # Tech Pack 模板
-│   └── prd-change-log-template.md     # PRD 变更日志模板
+├── process/                          # 流程规范（SOP）
+│   └── ai-automation-dev-workflow.md  # 四阶段 SOP
 ├── requirements/                      # 需求文档
 │   └── <module>-prd.md                # 各模块 PRD（如 user-module-prd.md）
 ├── design/                            # 设计文档（按模块分子目录）
@@ -21,14 +18,6 @@ doc/
 │   └── YYYY-MM-DD-<主题>-doc-review.md
 └── README.md                          # 文档索引
 
-specflow_plan/                          # 基础设施与架构文档
-├── 项目启动记录.md                     # SOP 阶段进度
-├── 部署架构设计（Cloudflare Tunnel + 家庭节点）.md
-├── 工程架构方案定稿（DDD light）.md
-├── ADR-0001 技术选型定稿 v2.0.md
-├── 项目背景介绍.md
-└── MCP 清单（工程建设与运维阶段可用）.md
-
 CLAUDE.md                             # 项目级 AI 指令
 .claude/memory/MEMORY.md              # AI 记忆（进度 + 经验教训）
 ```
@@ -40,9 +29,14 @@ CLAUDE.md                             # 项目级 AI 指令
 | 文档 | 必须存在 | 预期内容 |
 |------|---------|---------|
 | `ai-automation-dev-workflow.md` | 是 | 四阶段 SOP（A→B→C→D），版本号 >= v0.4 |
-| `prd-lite-template.md` | 是 | 8 个标准章节模板 |
-| `tech-pack-template.md` | 是 | 8 个标准章节模板 |
-| `prd-change-log-template.md` | 是 | 变更日志格式模板 |
+
+### 模板文件（位于 skill references 中）
+
+| 文档 | 位置 | 预期内容 |
+|------|------|---------|
+| PRD-Lite 模板 | `specflow-doc-prd/references/prd-lite-template.md` | 8 个标准章节模板 |
+| PRD 变更日志模板 | `specflow-doc-prd/references/prd-change-log-template.md` | 变更日志格式模板 |
+| Tech Pack 模板 | `specflow-doc-techpack/references/tech-pack-template.md` | 8 个标准章节模板 |
 
 ### 需求文档 (`doc/requirements/`)
 
@@ -63,14 +57,6 @@ CLAUDE.md                             # 项目级 AI 指令
 | Tech Pack 章节 | 8 章：输入基线、规则映射、数据库设计、API 设计、测试清单、代码组织、决策项、变更协调 |
 | 编号体系 | API-xx, D-xx（决策项）, CL-xx（变更联动） |
 
-### 基础设施文档 (`specflow_plan/`)
-
-| 文档 | 真相源（Source of Truth） |
-|------|------------------------|
-| 项目启动记录 | 阶段完成状态须与 `MEMORY.md` Progress 章节一致 |
-| 部署架构设计 | 须与 `deploy/docker-compose.yml` 和 `deploy/deploy.sh` 配置一致 |
-| 技术选型 ADR | Java/Spring Boot 版本须与根 `pom.xml` 一致 |
-
 ### AI 配置文件
 
 | 文档 | 预期内容 |
@@ -84,11 +70,9 @@ CLAUDE.md                             # 项目级 AI 指令
 
 | 对齐项 | 涉及文档 |
 |--------|---------|
-| 端口号 | 部署架构设计、`deploy/docker-compose.yml`、CLAUDE.md |
-| 项目路径 | 部署架构设计、MEMORY.md、`deploy/deploy.sh` |
-| 镜像版本 | 部署架构设计、`deploy/docker-compose.yml` |
-| 域名 | 部署架构设计、CLAUDE.md |
-| Java/Spring Boot 版本 | ADR 技术选型、`pom.xml`、CLAUDE.md |
-| 部署命令 | 部署架构设计、MEMORY.md、CLAUDE.md |
-| 阶段完成状态 | `specflow_plan/项目启动记录.md`、MEMORY.md |
+| 端口号 | `deploy/docker-compose.yml`、CLAUDE.md |
+| 项目路径 | MEMORY.md、`deploy/deploy.sh` |
+| 镜像版本 | `deploy/docker-compose.yml` |
+| Java/Spring Boot 版本 | `pom.xml`、CLAUDE.md |
+| 部署命令 | MEMORY.md、CLAUDE.md、`deploy/RUNBOOK.md` |
 | 模块执行状态 | `ai-automation-dev-workflow.md` §8、实际文件存在性 |

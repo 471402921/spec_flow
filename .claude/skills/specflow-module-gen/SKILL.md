@@ -49,14 +49,20 @@ description: SpecFlow Service 模块脚手架生成技能 - 根据 Tech Pack 自
      - D-xx: {决策描述}
      请先在联合快审中确认这些决策项。
      ```
-4. 如果 `review-checklist.md` 文件不存在 → **终止生成**，提示用户：
-   ```
-   ⛔ 未找到 doc/design/{module}/review-checklist.md。
-   请先使用 /specflow-doc-techpack 生成 Tech Pack 和联合快审要点，
-   然后完成联合快审（Stage C）后再生成模块。
-   ```
+4. 如果 `review-checklist.md` 文件不存在：
+   - **项目已有其他业务模块** → **终止生成**，提示用户：
+     ```
+     ⛔ 未找到 doc/design/{module}/review-checklist.md。
+     请先使用 /specflow-doc-techpack 生成 Tech Pack 和联合快审要点，
+     然后完成联合快审（Stage C）后再生成模块。
+     ```
+   - **项目尚无任何业务模块（首个模块）** → 降级为**警告**，允许继续生成：
+     ```
+     ⚠️ 未找到 review-checklist.md。作为项目首个模块，允许跳过联合快审门禁。
+     建议后续补充 Tech Pack 和联合快审流程。
+     ```
 
-> **原则**：Tech Pack → 联合快审通过 → 才能生成代码。这是工作流 Stage C → Stage D 的硬性门禁。
+> **原则**：Tech Pack → 联合快审通过 → 才能生成代码。这是工作流 Stage C → Stage D 的硬性门禁。首个模块可降级为警告以避免冷启动死锁。
 
 ---
 

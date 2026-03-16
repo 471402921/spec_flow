@@ -102,7 +102,7 @@
 
 **路径设计规范：**
 
-- 资源嵌套最多两层：`/api/v1/families/{familyId}/members`
+- 资源嵌套最多两层：`/api/v1/teams/{teamId}/members`
 - 非 CRUD 操作用动词子路径：`/api/v1/pets/{id}/restore`
 - 查询参数用于过滤和分页，不出现在路径中
 
@@ -118,7 +118,7 @@
 
 **仅首批次（P0）需要详细写**，后续批次标注「复用 P0 鉴权方案」。
 
-读取现有代码的 auth/session 模块结构，生成：
+读取现有代码的认证模块结构（AuthInterceptor / TokenProvider），生成：
 - 认证方式
 - 认证流程
 - 排除路径列表（不需要鉴权的 API）
