@@ -3,70 +3,44 @@
 ## 架构总览
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│  开发 Mac                                                       │
-│  ┌──────────────┐   git push    ┌──────────────┐               │
-│  │ Local Dev    │ ────────────> │ GitHub       │               │
-│  │ ./mvnw test  │               │ CI Pipeline  │               │
-│  └──────┬───────┘               └──────────────┘               │
-│         │ ssh home-node (Tailscale)                              │
-└─────────┼───────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────┐
+│  开发 Mac                                                │
+│  ┌──────────────┐   git push    ┌──────────────┐        │
+│  │ Local Dev    │ ────────────> │ GitHub       │        │
+│  └──────┬───────┘               └──────────────┘        │
+│         │ ssh specflow                                   │
+└─────────┼───────────────────────────────────────────────┘
           │
           ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  Home Node (WSL2/Ubuntu 20.04)                                   │
-│  Tailscale IP: 100.104.158.31                                    │
-│                                                                 │
-│  ┌── Docker Compose ──────────────────────────────────┐         │
-│  │                                                     │         │
-│  │  ┌─────────────┐  ┌───────────┐  ┌──────────────┐ │         │
-│  │  │ postgres:16 │  │ redis:7   │  │ specflow-api  │ │         │
-│  │  │ :5432       │  │ :6379     │  │ :8080        │ │         │
-│  │  │ vol:pgdata  │  │ vol:redis │  │ Java 21 JRE  │ │         │
-│  │  └─────────────┘  └───────────┘  └──────┬───────┘ │         │
-│  └─────────────────────────────────────────┼─────────┘         │
-│                                             │                    │
-│  ┌── Cloudflare Tunnel (cloudflared) ───────┘                   │
-│  │  tunnel: home-dev                                            │
-│  │  hostname: api.specflow.dev → localhost:8080                   │
-│  └──────────────────────────────────────────────────────────────│
-└─────────────────────────────────────────────────────────────────┘
-          │
-          ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  Cloudflare Edge                                                 │
-│  TLS 终止 → https://api.specflow.dev                              │
-│  → Swagger UI: /swagger-ui/index.html                           │
-│  → Health:     /actuator/health                                  │
-│  → API:        /api/v1/*                                        │
-└─────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────┐
+│  腾讯云轻量应用服务器（Ubuntu 24.04, 4C8G）               │
+│  IP: 81.71.88.130                                        │
+│                                                          │
+│  ┌── Nginx (反向代理 + Let's Encrypt HTTPS) ──────────┐ │
+│  │  443 → proxy_pass http://localhost:8080              │ │
+│  └──────────────────────────────────────────────────────┘ │
+│                                                          │
+│  ┌── Docker Compose ──────────────────────────────────┐  │
+│  │  ┌─────────────┐  ┌───────────┐  ┌──────────────┐ │  │
+│  │  │ postgres:16 │  │ redis:7   │  │ specflow-api │  │  │
+│  │  │ :5432       │  │ :6379     │  │ :8080        │  │  │
+│  │  │ vol:pgdata  │  │ vol:redis │  │ Java 21 JRE  │  │  │
+│  │  └─────────────┘  └───────────┘  └──────────────┘  │  │
+│  └────────────────────────────────────────────────────┘  │
+└──────────────────────────────────────────────────────────┘
 ```
 
 ## 连接方式
 
-### SSH 到 Home Node
+### SSH 到服务器
 
 ```bash
-ssh home-node
-# 等同于: ssh ssccddjjjj@100.104.158.31
+ssh specflow
+# 等同于: ssh ubuntu@81.71.88.130 -i ~/.ssh/jet.pem
 ```
 
-- 认证：SSH key（无需密码）
-- sudo 需要：`echo 'pw' | sudo -S {command}`（非交互模式无 TTY）
-
-### Tailscale 网络
-
-| 节点 | IP | 说明 |
-|------|-----|------|
-| Windows 主机 | `100.66.161.47` | Tailscale 客户端 |
-| WSL2 (home-node) | `100.104.158.31` | 独立安装 tailscaled |
-
-WSL2 的 tailscaled 需手动启动（重启后不会自动运行）：
-
-```bash
-sudo nohup tailscaled > /tmp/tailscaled.log 2>&1 &
-sudo tailscale up
-```
+- 认证：SSH key（`~/.ssh/jet.pem`）
+- 用户：`ubuntu`
 
 ## 容器配置
 
@@ -96,62 +70,40 @@ sudo tailscale up
 1. **Builder**: `eclipse-temurin:21-jdk` + Maven 编译
 2. **Runtime**: `eclipse-temurin:21-jre` + JAR 运行
 
-构建参数：`MODULE=specflow-api`（支持未来多模块）
-
 ### Docker Registry Mirrors
 
-Home node 配置了国内镜像加速（`/etc/docker/daemon.json`）：
+腾讯云镜像加速（`/etc/docker/daemon.json`）：
 
 ```json
 {
   "registry-mirrors": [
-    "https://docker.1ms.run",
-    "https://docker.xuanyuan.me"
+    "https://mirror.ccs.tencentyun.com",
+    "https://ccr.ccs.tencentyun.com"
   ]
 }
 ```
 
 ## 关键路径
 
-### Home Node 文件路径
+### 服务器文件路径
 
 | 路径 | 说明 |
 |------|------|
 | `/srv/specflow-service/` | 项目根目录（git clone） |
 | `/srv/specflow-service/deploy/` | Docker Compose + Dockerfile + deploy.sh |
 | `/srv/specflow-service/deploy/.env` | 环境变量（不入 git） |
-| `/etc/cloudflared/config.yml` | Cloudflare Tunnel 配置 |
-| `/etc/cloudflared/{tunnel-id}.json` | Tunnel 凭证文件 |
+| `/etc/nginx/sites-available/specflow` | Nginx 配置 |
 | `/etc/docker/daemon.json` | Docker 镜像加速配置 |
-| `/tmp/tailscaled.log` | Tailscale 守护进程日志 |
-
-### Cloudflare Tunnel 配置
-
-```yaml
-tunnel: b123f8b2-f3ac-4cfc-9b30-a07a0aec753d
-credentials-file: /etc/cloudflared/b123f8b2-f3ac-4cfc-9b30-a07a0aec753d.json
-ingress:
-  - hostname: api.specflow.dev
-    service: http://localhost:8080
-  - service: http_status:404
-```
-
-管理命令：
-
-```bash
-sudo systemctl start cloudflared
-sudo systemctl stop cloudflared
-sudo systemctl status cloudflared
-sudo systemctl enable cloudflared   # 开机自启
-```
 
 ### 公开访问 URL
 
 | URL | 说明 |
 |-----|------|
-| `https://api.specflow.dev/actuator/health` | 健康检查 |
-| `https://api.specflow.dev/swagger-ui/index.html` | Swagger UI |
-| `https://api.specflow.dev/api/v1/` | API 根路径 |
+| `https://{domain}/actuator/health` | 健康检查 |
+| `https://{domain}/swagger-ui/index.html` | Swagger UI |
+| `https://{domain}/api/v1/` | API 根路径 |
+
+> 域名配置完成后更新此表。
 
 ## deploy.sh 流程
 

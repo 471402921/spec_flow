@@ -6,8 +6,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 SpecFlow is a **Spec-Driven / Agentic Engineering** development framework — an opinionated scaffold for building Java backend services using DDD Light architecture, with AI-native development workflow (PRD → Tech Pack → Implementation → Review) baked in via Claude Code skills.
 
-The `user`, `auth`, and `family` modules are **showcase examples** demonstrating the framework's architecture and conventions.
-
 ## Build & Test Commands
 
 ```bash
@@ -21,10 +19,10 @@ The `user`, `auth`, and `family` modules are **showcase examples** demonstrating
 ./mvnw clean test
 
 # Run a single test class
-./mvnw test -Dtest=SessionServiceTest
+./mvnw test -Dtest=AuthInterceptorTest
 
 # Run a single test method
-./mvnw test -Dtest=SessionServiceTest#testCreateSession
+./mvnw test -Dtest=AuthInterceptorTest#preHandle_withValidToken_shouldPassAndInjectUserId
 
 # Checkstyle (fails build on warnings)
 ./mvnw checkstyle:check
@@ -33,6 +31,8 @@ The `user`, `auth`, and `family` modules are **showcase examples** demonstrating
 ./mvnw clean test jacoco:report
 ```
 
+> Note: 本地开发环境未配置 Java 21，构建和测试在服务器 Docker 中完成。
+
 ## Architecture: DDD Light Modular Monolith
 
 Java 21 + Spring Boot 3.4.2 + Maven multi-module. Three modules: `specflow-api` (REST service), `specflow-worker` (async tasks, placeholder), `specflow-common` (shared code).
@@ -40,9 +40,8 @@ Java 21 + Spring Boot 3.4.2 + Maven multi-module. Three modules: `specflow-api` 
 ### Shared Infrastructure
 
 - **`specflow-common`**: `Result<T>` unified response wrapper, exception hierarchy (`BusinessException`, `NotFoundException`, `AuthenticationException`)
-- **`specflow-api/config/`**: `GlobalExceptionHandler` (maps exceptions → `Result<T>` with HTTP status), `TraceIdInterceptor` (MDC-based `traceId` injected into all logs and `X-Trace-Id` response header), `AuthInterceptor` (Bearer token validation), `SecurityConfig` (BCrypt password encoder), `OpenApiConfig`. Both interceptors registered in `WebConfig`
+- **`specflow-api/config/`**: `GlobalExceptionHandler` (maps exceptions → `Result<T>` with HTTP status), `TraceIdInterceptor` (MDC-based `traceId` injected into all logs and `X-Trace-Id` response header), `AuthInterceptor` (Bearer token validation via `TokenProvider` interface), `SecurityConfig` (BCrypt password encoder), `OpenApiConfig`, `NoOpTokenProvider` (default fallback). Both interceptors registered in `WebConfig`
 - All controllers return `Result<T>` — use `Result.success(data)` / `Result.failure(code, msg)`
-- Business config namespace: `specflow.*` (e.g. `specflow.session.expiration-days`)
 
 ### Module Layout (per business module in specflow-api)
 
@@ -59,12 +58,12 @@ infrastructure/      # Repository impls, DO classes (MyBatis-Plus @TableName), c
 
 ### Key Patterns
 
-- **DO/Entity separation**: `SessionDO` (database, `LocalDateTime`) ↔ `Session` (domain, `Instant`) via `SessionConverter`
+- **DO/Entity separation**: `XxxDO` (database, `LocalDateTime`) ↔ `Xxx` (domain, `Instant`) via `XxxConverter`
 - **Repository pattern**: Interface in `domain/repository/`, implementation in `infrastructure/persistence/`
 - **ID generation**: `ASSIGN_UUID` (MyBatis-Plus auto-generated UUIDs)
 - **Soft deletes**: MyBatis-Plus `logic-delete-field=deleted` with `deleted_at` timestamp for 30-day retention
 - **Timezone**: Always use `ZoneId.of("UTC")` explicitly, never `ZoneId.systemDefault()`
-- **Authentication**: `AuthInterceptor` validates Bearer tokens via `TokenProvider`, stores `userId` in request attributes; public paths configured in `EXCLUDE_PATHS`. Controllers access it via `(String) request.getAttribute("userId")`
+- **Authentication**: `AuthInterceptor` validates Bearer tokens via `TokenProvider` interface (in `config/` package), stores `userId` in request attributes. Business modules implement `TokenProvider` to provide token resolution; `NoOpTokenProvider` is the default fallback (rejects all tokens). Controllers access userId via `(String) request.getAttribute("userId")`
 - **Security**: Use `PasswordEncoder` bean from `SecurityConfig` for password hashing (BCrypt)
 
 ## Logging
@@ -87,15 +86,12 @@ infrastructure/      # Repository impls, DO classes (MyBatis-Plus @TableName), c
 - **Lombok**: Use `@RequiredArgsConstructor` (final fields), `@Data` (DTOs), `@Slf4j` (logging). Prefer primitive `boolean` over `Boolean` wrapper. Note: `Boolean` wrapper generates `getXxx()`, primitive `boolean` generates `isXxx()`.
 - **Null safety**: Use `@NonNull` from `org.springframework.lang` for constructor parameters; validate with `Objects.requireNonNull()`
 
-## CI Pipeline
-
-GitHub Actions (`.github/workflows/ci.yml`): three sequential jobs — checkstyle → test → package. Fail-fast (later jobs only run if prior ones pass).
-
 ## Deployment
 
 - Docker Compose in `deploy/`: postgres:16, redis:7-alpine, api
 - Deploy script: `deploy/deploy.sh` (git pull → compose down → rebuild → health check)
-- HTTPS via Nginx + Let's Encrypt (see `deploy/RUNBOOK.md` for Nginx config template)
+- Server: 腾讯云轻量应用服务器, SSH alias `specflow`
+- HTTPS via Nginx + Let's Encrypt (see `deploy/RUNBOOK.md`)
 - Docker services use healthcheck dependencies (api waits for postgres + redis to be healthy)
 - Operational runbook: `deploy/RUNBOOK.md`
 
