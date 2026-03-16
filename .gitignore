@@ -1,6 +1,7 @@
 # Claude Code - Local user files
 .claude/*
 !.claude/skills/
+!.claude/specflow-env.example.md
 
 # macOS
 .DS_Store

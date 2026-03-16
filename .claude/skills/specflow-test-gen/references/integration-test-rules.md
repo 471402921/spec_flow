@@ -123,13 +123,13 @@ class {Controller}Test {
 
 ```java
 // ✅ 正确：只加载指定 Controller，速度快
-@WebMvcTest(SessionController.class)
-class SessionControllerTest { }
+@WebMvcTest(OrderController.class)
+class OrderControllerTest { }
 
 // ❌ 错误：加载完整 Spring 上下文，太慢
 @SpringBootTest
 @AutoConfigureMockMvc
-class SessionControllerTest { }
+class OrderControllerTest { }
 ```
 
 ### TEST-I002: @MockBean 声明服务依赖
@@ -137,25 +137,25 @@ class SessionControllerTest { }
 ```java
 // ✅ 正确：Mock 掉 Application 层服务
 @MockBean
-private SessionService sessionService;
+private OrderService orderService;
 
 // ❌ 错误：直接注入真实服务
 @Autowired
-private SessionService sessionService;  // @WebMvcTest 不加载 Service
+private OrderService orderService;  // @WebMvcTest 不加载 Service
 ```
 
 ### TEST-I003: 验证 HTTP 状态码 + 响应体
 
 ```java
 // ✅ 正确：同时验证状态码和响应体结构
-mockMvc.perform(get("/api/v1/sessions/test-token"))
+mockMvc.perform(get("/api/v1/orders/test-token"))
         .andExpect(status().isOk())                      // HTTP 200
         .andExpect(jsonPath("$.code").value(200))         // 业务状态码
         .andExpect(jsonPath("$.data.token").isNotEmpty()) // 数据字段
         .andExpect(jsonPath("$.data.userId").value("test-user"));
 
 // ❌ 错误：只验证状态码
-mockMvc.perform(get("/api/v1/sessions/test-token"))
+mockMvc.perform(get("/api/v1/orders/test-token"))
         .andExpect(status().isOk());  // 不知道响应体是否正确
 ```
 
@@ -165,19 +165,19 @@ mockMvc.perform(get("/api/v1/sessions/test-token"))
 
 ```java
 // NotFoundException → 404
-mockMvc.perform(get("/api/v1/sessions/bad"))
+mockMvc.perform(get("/api/v1/orders/bad"))
         .andExpect(status().isNotFound())
         .andExpect(jsonPath("$.code").value(404))
         .andExpect(jsonPath("$.message").isNotEmpty());
 
 // AuthenticationException → 401
-mockMvc.perform(post("/api/v1/sessions/bad/validate"))
+mockMvc.perform(post("/api/v1/orders/bad/validate"))
         .andExpect(status().isUnauthorized())
         .andExpect(jsonPath("$.code").value(401))
         .andExpect(jsonPath("$.message").isNotEmpty());
 
 // MethodArgumentNotValidException → 400
-mockMvc.perform(post("/api/v1/sessions")
+mockMvc.perform(post("/api/v1/orders")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{}"))
         .andExpect(status().isBadRequest());
@@ -187,15 +187,15 @@ mockMvc.perform(post("/api/v1/sessions")
 
 ```java
 // ✅ 方式 1：直接写 JSON 字符串（简单场景）
-mockMvc.perform(post("/api/v1/sessions")
+mockMvc.perform(post("/api/v1/orders")
         .contentType(MediaType.APPLICATION_JSON)
         .content("{\"userId\":\"test-user\"}"));
 
 // ✅ 方式 2：使用 ObjectMapper（复杂对象）
-CreateSessionRequest request = new CreateSessionRequest();
+CreateOrderRequest request = new CreateOrderRequest();
 request.setUserId("test-user");
 
-mockMvc.perform(post("/api/v1/sessions")
+mockMvc.perform(post("/api/v1/orders")
         .contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(request)));
 ```
@@ -209,8 +209,8 @@ import static org.mockito.Mockito.doNothing;
 
 // 正常场景：void 方法默认不需要 mock（doNothing）
 // 异常场景：
-doThrow(new NotFoundException("会话不存在"))
-        .when(sessionService).revokeSession(anyString());
+doThrow(new NotFoundException("订单不存在"))
+        .when(orderService).cancelOrder(anyString());
 ```
 
 ## Controller 测试覆盖矩阵
@@ -239,7 +239,7 @@ SpecFlow 项目使用 `Result<T>` 统一响应：
 // 失败
 {
     "code": 404,
-    "message": "会话不存在",
+    "message": "订单不存在",
     "data": null
 }
 ```

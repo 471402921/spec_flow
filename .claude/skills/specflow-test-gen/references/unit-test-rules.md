@@ -88,17 +88,17 @@ class {Service}Test {
 // ✅ 正确：公共数据在 setUp 中初始化
 @BeforeEach
 void setUp() {
-    ReflectionTestUtils.setField(sessionService, "sessionExpirationDays", 30);
+    ReflectionTestUtils.setField(orderService, "orderExpirationDays", 30);
     testUserId = "test-user-123";
-    testToken = "token_abc123def456";
-    mockSession = Session.create(testUserId, testToken, 30);
+    testOrderNo = "ORD-20250101-001";
+    mockOrder = Order.create(testUserId, testOrderNo, 30);
 }
 
 // ❌ 错误：每个测试重复创建相同数据
 @Test
 void test1() {
     String userId = "test-user-123";  // 重复
-    Session session = Session.create(userId, "token", 30);  // 重复
+    Order order = Order.create(userId, "token", 30);  // 重复
 }
 ```
 
@@ -107,14 +107,14 @@ void test1() {
 ```java
 // ✅ 正确：使用注解声明
 @Mock
-private SessionRepository sessionRepository;
+private OrderRepository orderRepository;
 
 @InjectMocks
-private SessionService sessionService;
+private OrderService orderService;
 
 // ❌ 错误：手动创建 Mock
-private SessionRepository sessionRepository = Mockito.mock(SessionRepository.class);
-private SessionService sessionService = new SessionService(sessionRepository);
+private OrderRepository orderRepository = Mockito.mock(OrderRepository.class);
+private OrderService orderService = new OrderService(orderRepository);
 ```
 
 ### TEST-U003: @Value 字段处理
@@ -123,7 +123,7 @@ private SessionService sessionService = new SessionService(sessionRepository);
 // ✅ 正确：使用 ReflectionTestUtils
 @BeforeEach
 void setUp() {
-    ReflectionTestUtils.setField(sessionService, "sessionExpirationDays", 30);
+    ReflectionTestUtils.setField(orderService, "orderExpirationDays", 30);
 }
 
 // ❌ 错误：期望 @Value 在单元测试中自动注入
@@ -135,23 +135,23 @@ void setUp() {
 ```java
 // ✅ 正确：验证 Repository 方法被调用
 @Test
-void revokeSession_shouldCallSave() {
-    when(sessionRepository.findByToken(testToken))
-            .thenReturn(Optional.of(mockSession));
+void cancelOrder_shouldCallSave() {
+    when(orderRepository.findById(testOrderNo))
+            .thenReturn(Optional.of(mockOrder));
 
-    sessionService.revokeSession(testToken);
+    orderService.cancelOrder(testOrderNo);
 
-    verify(sessionRepository).findByToken(testToken);
-    verify(sessionRepository).save(mockSession);
+    verify(orderRepository).findById(testOrderNo);
+    verify(orderRepository).save(mockOrder);
 }
 
 // ❌ 错误：只验证返回值，不验证交互
 @Test
-void revokeSession_incomplete() {
-    when(sessionRepository.findByToken(testToken))
-            .thenReturn(Optional.of(mockSession));
+void cancelOrder_incomplete() {
+    when(orderRepository.findById(testOrderNo))
+            .thenReturn(Optional.of(mockOrder));
 
-    sessionService.revokeSession(testToken);
+    orderService.cancelOrder(testOrderNo);
     // 缺少 verify
 }
 ```
@@ -160,12 +160,12 @@ void revokeSession_incomplete() {
 
 ```java
 // ✅ 正确：验证异常类型 + 消息内容
-assertThatThrownBy(() -> sessionService.revokeSession("bad-token"))
+assertThatThrownBy(() -> orderService.cancelOrder("bad-token"))
         .isInstanceOf(NotFoundException.class)         // 类型
-        .hasMessageContaining("会话不存在");             // 消息
+        .hasMessageContaining("订单不存在");             // 消息
 
 // ❌ 错误：只验证异常类型
-assertThatThrownBy(() -> sessionService.revokeSession("bad-token"))
+assertThatThrownBy(() -> orderService.cancelOrder("bad-token"))
         .isInstanceOf(Exception.class);  // 太宽泛
 ```
 
@@ -187,32 +187,32 @@ class {Entity}Test {
     @Test
     @DisplayName("create - 工厂方法应生成有效实体")
     void create_shouldReturnValidEntity() {
-        Session session = Session.create("user-123", "token_abc", 30);
+        Order order = Order.create("user-123", "ORD-001", 30);
 
-        assertThat(session.getUserId()).isEqualTo("user-123");
-        assertThat(session.getToken()).isEqualTo("token_abc");
-        assertThat(session.isValid()).isTrue();
-        assertThat(session.isRevoked()).isFalse();
+        assertThat(order.getUserId()).isEqualTo("user-123");
+        assertThat(order.getOrderNo()).isEqualTo("ORD-001");
+        assertThat(order.isValid()).isTrue();
+        assertThat(order.isCancelled()).isFalse();
     }
 
     @Test
-    @DisplayName("revoke - 撤销后应标记为无效")
+    @DisplayName("revoke - 取消后应标记为无效")
     void revoke_shouldMarkAsInvalid() {
-        Session session = Session.create("user-123", "token_abc", 30);
+        Order order = Order.create("user-123", "ORD-001", 30);
 
-        session.revoke();
+        order.cancel();
 
-        assertThat(session.isRevoked()).isTrue();
-        assertThat(session.isValid()).isFalse();
+        assertThat(order.isCancelled()).isTrue();
+        assertThat(order.isValid()).isFalse();
     }
 
     @Test
-    @DisplayName("isExpired - 过期会话应返回 true")
+    @DisplayName("isExpired - 过期订单应返回 true")
     void isExpired_whenPastExpirationDate_shouldReturnTrue() {
-        // 创建一个已经过期的会话（过期天数设为 -1）
-        Session session = Session.create("user-123", "token_abc", -1);
+        // 创建一个已经过期的订单（过期天数设为 -1）
+        Order order = Order.create("user-123", "ORD-001", -1);
 
-        assertThat(session.isExpired()).isTrue();
+        assertThat(order.isExpired()).isTrue();
     }
 }
 ```
@@ -235,11 +235,11 @@ class {Entity}Test {
 
 ```java
 // ✅ 好的命名
-createSession_shouldReturnValidSession()
-getSessionByToken_whenSessionExists_shouldReturnSession()
-getSessionByToken_whenSessionNotExists_shouldThrowNotFoundException()
-validateSession_whenSessionIsExpired_shouldThrowAuthenticationException()
-revokeSession_shouldSuccessfullyRevoke()
+createOrder_shouldReturnValidSession()
+getOrderById_whenOrderExists_shouldReturnOrder()
+getOrderById_whenOrderNotExists_shouldThrowNotFoundException()
+validateOrder_whenOrderIsExpired_shouldThrowBusinessException()
+cancelOrder_shouldSuccessfullyRevoke()
 
 // ❌ 差的命名
 test1()

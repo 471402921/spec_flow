@@ -44,17 +44,17 @@ description: SpecFlow Service 项目测试生成技能 - 为 DDD Light 架构的
 ```markdown
 🔍 代码分析结果：
 
-**类**: SessionService (application 层)
-**依赖**: SessionRepository
-**配置**: @Value sessionExpirationDays
+**类**: OrderService (application 层)
+**依赖**: OrderRepository
+**配置**: @Value orderExpirationDays
 
 **方法清单**:
 | 方法 | 返回值 | 正常场景 | 异常场景 |
 |------|--------|---------|---------|
-| createSession | Session | 创建成功 | - |
-| getSessionByToken | Session | 会话存在 | NotFoundException |
-| validateSession | boolean | 会话有效 | AuthenticationException (3种) |
-| revokeSession | void | 撤销成功 | NotFoundException |
+| createOrder | Order | 创建成功 | - |
+| getOrderById | Order | 订单存在 | NotFoundException |
+| validateOrder | boolean | 订单有效 | BusinessException (3种) |
+| cancelOrder | void | 取消成功 | NotFoundException |
 
 **预计测试用例**: 9 个
 ```
@@ -146,8 +146,8 @@ description: SpecFlow Service 项目测试生成技能 - 为 DDD Light 架构的
 ### 生成文件
 | 文件 | 测试类型 | 用例数 |
 |------|---------|--------|
-| SessionServiceTest.java | 单元测试 | 9 |
-| SessionControllerTest.java | 集成测试 | 8 |
+| OrderServiceTest.java | 单元测试 | 9 |
+| OrderControllerTest.java | 集成测试 | 8 |
 
 ### 执行结果
 - Tests run: 17, Failures: 0, Errors: 0
@@ -157,9 +157,9 @@ description: SpecFlow Service 项目测试生成技能 - 为 DDD Light 架构的
 ### 测试场景覆盖
 | 方法 | 正常 | 异常 | 边界 |
 |------|------|------|------|
-| createSession | ✅ | - | - |
-| validateSession | ✅ | ✅×3 | - |
-| revokeSession | ✅ | ✅ | - |
+| createOrder | ✅ | - | - |
+| validateOrder | ✅ | ✅×3 | - |
+| cancelOrder | ✅ | ✅ | - |
 ```
 
 ## DDD Light 分层测试策略

@@ -8,22 +8,21 @@
 │  ┌──────────────┐   git push    ┌──────────────┐        │
 │  │ Local Dev    │ ────────────> │ GitHub       │        │
 │  └──────┬───────┘               └──────────────┘        │
-│         │ ssh specflow                                   │
+│         │ ssh {SSH_ALIAS}                                │
 └─────────┼───────────────────────────────────────────────┘
           │
           ▼
 ┌─────────────────────────────────────────────────────────┐
-│  腾讯云轻量应用服务器（Ubuntu 24.04, 4C8G）               │
-│  IP: 81.71.88.130                                        │
+│  云服务器（Ubuntu, 推荐 4C8G）                             │
 │                                                          │
 │  ┌── Nginx (反向代理 + Let's Encrypt HTTPS) ──────────┐ │
-│  │  443 → proxy_pass http://localhost:8080              │ │
+│  │  443 → proxy_pass http://localhost:{API_PORT}       │ │
 │  └──────────────────────────────────────────────────────┘ │
 │                                                          │
 │  ┌── Docker Compose ──────────────────────────────────┐  │
 │  │  ┌─────────────┐  ┌───────────┐  ┌──────────────┐ │  │
-│  │  │ postgres:16 │  │ redis:7   │  │ specflow-api │  │  │
-│  │  │ :5432       │  │ :6379     │  │ :8080        │  │  │
+│  │  │ postgres:16 │  │ redis:7   │  │ api          │  │  │
+│  │  │ :5432       │  │ :6379     │  │ :{API_PORT}  │  │  │
 │  │  │ vol:pgdata  │  │ vol:redis │  │ Java 21 JRE  │  │  │
 │  │  └─────────────┘  └───────────┘  └──────────────┘  │  │
 │  └────────────────────────────────────────────────────┘  │
@@ -35,12 +34,10 @@
 ### SSH 到服务器
 
 ```bash
-ssh specflow
-# 等同于: ssh ubuntu@81.71.88.130 -i ~/.ssh/jet.pem
+ssh {SSH_ALIAS}
 ```
 
-- 认证：SSH key（`~/.ssh/jet.pem`）
-- 用户：`ubuntu`
+SSH 连接配置在本地 `~/.ssh/config` 中定义（Host 别名、用户名、密钥路径等），skill 从 `.claude/specflow-env.md` 的 `deploy.ssh_alias` 读取别名。
 
 ## 容器配置
 
@@ -48,9 +45,9 @@ ssh specflow
 
 | 容器 | 镜像 | 端口 | 数据卷 | 健康检查 |
 |------|------|------|--------|---------|
-| specflow-postgres | postgres:16 | 5432 | pgdata | `pg_isready -U specflow` |
-| specflow-redis | redis:7-alpine | 6379 | redisdata | `redis-cli ping` |
-| specflow-api | 本地构建 | 8080 | 无 | 依赖 postgres healthy |
+| postgres | postgres:16 | 5432 | pgdata | `pg_isready -U {DB_USER}` |
+| redis | redis:7-alpine | 6379 | redisdata | `redis-cli ping` |
+| api | 本地构建 | {API_PORT} | 无 | 依赖 postgres healthy |
 
 ### 环境变量
 
@@ -72,16 +69,7 @@ ssh specflow
 
 ### Docker Registry Mirrors
 
-腾讯云镜像加速（`/etc/docker/daemon.json`）：
-
-```json
-{
-  "registry-mirrors": [
-    "https://mirror.ccs.tencentyun.com",
-    "https://ccr.ccs.tencentyun.com"
-  ]
-}
-```
+如在国内服务器部署，建议配置镜像加速（`/etc/docker/daemon.json`）。
 
 ## 关键路径
 
@@ -89,10 +77,10 @@ ssh specflow
 
 | 路径 | 说明 |
 |------|------|
-| `/srv/specflow-service/` | 项目根目录（git clone） |
-| `/srv/specflow-service/deploy/` | Docker Compose + Dockerfile + deploy.sh |
-| `/srv/specflow-service/deploy/.env` | 环境变量（不入 git） |
-| `/etc/nginx/sites-available/specflow` | Nginx 配置 |
+| `{SERVICE_PATH}/` | 项目根目录（git clone） |
+| `{SERVICE_PATH}/deploy/` | Docker Compose + Dockerfile + deploy.sh |
+| `{SERVICE_PATH}/deploy/.env` | 环境变量（不入 git） |
+| `/etc/nginx/sites-available/` | Nginx 配置 |
 | `/etc/docker/daemon.json` | Docker 镜像加速配置 |
 
 ### 公开访问 URL
@@ -116,7 +104,7 @@ docker compose up -d --build
     ↓
 sleep 15（等待容器启动）
     ↓
-curl localhost:8080/actuator/health
+curl localhost:{API_PORT}/actuator/health
     ↓
 输出状态和访问 URL
 ```

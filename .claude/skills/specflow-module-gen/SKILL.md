@@ -10,7 +10,7 @@ description: SpecFlow Service 模块脚手架生成技能 - 根据 Tech Pack 自
 ## 核心原则
 
 - **Tech Pack 驱动** — 所有生成物（表结构、API、实体字段）必须来源于 Tech Pack 定义，不凭空创造
-- **架构一致性** — 与现有模块（auth、user）保持完全一致的结构、命名、注解风格
+- **架构一致性** — 与项目现有模块保持完全一致的结构、命名、注解风格
 - **可编译即交付** — 生成的代码必须通过 Checkstyle，且能编译成功（compile, not necessarily pass all tests）
 - **最小生成** — 只生成骨架，不实现复杂业务逻辑；Service 方法体留 TODO 注释，由开发者填充
 
@@ -141,7 +141,7 @@ description: SpecFlow Service 模块脚手架生成技能 - 根据 Tech Pack 自
 
 | 类别 | 规范 | 示例 |
 |------|------|------|
-| 模块目录 | 小写单数 | `user`, `auth`, `pet-care` → `petcare` |
+| 模块目录 | 小写单数 | `order`, `product`, `pet-care` → `petcare` |
 | 实体类 | 大驼峰单数 | `User`, `Pet`, `CareRecord` |
 | 表名 | 蛇形复数 | `users`, `pets`, `care_records` |
 | API 路径 | 蛇形复数 | `/api/v1/users`, `/api/v1/care-records` |

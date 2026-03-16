@@ -6,9 +6,9 @@
 
 ```
 1. 容器是否运行？    → docker compose ps
-2. API 是否健康？    → curl localhost:8080/actuator/health
+2. API 是否健康？    → curl localhost:{API_PORT}/actuator/health
 3. 日志有无报错？    → docker compose logs --tail=50 api
-4. 数据库可连接？    → docker compose exec -T postgres pg_isready -U specflow
+4. 数据库可连接？    → docker compose exec -T postgres pg_isready -U {DB_USER}
 5. Nginx 是否正常？  → sudo systemctl status nginx && sudo nginx -t
 6. 公网可达？        → curl https://{domain}/actuator/health
 ```
@@ -23,10 +23,10 @@
 
 ```bash
 # 查看启动日志
-ssh specflow "cd /srv/specflow-service/deploy && docker compose logs --tail=100 api"
+ssh {SSH_ALIAS} "cd {SERVICE_PATH}/deploy && docker compose logs --tail=100 api"
 
 # 检查 Postgres 健康状态（API 依赖 Postgres healthy）
-ssh specflow "cd /srv/specflow-service/deploy && docker compose ps postgres"
+ssh {SSH_ALIAS} "cd {SERVICE_PATH}/deploy && docker compose ps postgres"
 ```
 
 **常见原因与解决**:
@@ -46,9 +46,9 @@ ssh specflow "cd /srv/specflow-service/deploy && docker compose ps postgres"
 **排查**:
 
 ```bash
-ssh specflow "cd /srv/specflow-service/deploy && docker compose ps postgres"
-ssh specflow "cd /srv/specflow-service/deploy && docker compose exec -T postgres pg_isready -U specflow"
-ssh specflow "cd /srv/specflow-service/deploy && docker compose logs --tail=50 postgres"
+ssh {SSH_ALIAS} "cd {SERVICE_PATH}/deploy && docker compose ps postgres"
+ssh {SSH_ALIAS} "cd {SERVICE_PATH}/deploy && docker compose exec -T postgres pg_isready -U {DB_USER}"
+ssh {SSH_ALIAS} "cd {SERVICE_PATH}/deploy && docker compose logs --tail=50 postgres"
 ```
 
 **常见原因与解决**:
@@ -61,22 +61,22 @@ ssh specflow "cd /srv/specflow-service/deploy && docker compose logs --tail=50 p
 
 ### 3. 公网无法访问（Nginx）
 
-**症状**: 内网 `curl localhost:8080` 正常，但公网访问失败
+**症状**: 内网 `curl localhost:{API_PORT}` 正常，但公网访问失败
 
 **排查**:
 
 ```bash
 # Nginx 状态
-ssh specflow "sudo systemctl status nginx --no-pager -l"
+ssh {SSH_ALIAS} "sudo systemctl status nginx --no-pager -l"
 
 # Nginx 配置检查
-ssh specflow "sudo nginx -t"
+ssh {SSH_ALIAS} "sudo nginx -t"
 
 # Nginx 错误日志
-ssh specflow "sudo tail -20 /var/log/nginx/error.log"
+ssh {SSH_ALIAS} "sudo tail -20 /var/log/nginx/error.log"
 
 # HTTPS 证书状态
-ssh specflow "sudo certbot certificates"
+ssh {SSH_ALIAS} "sudo certbot certificates"
 ```
 
 **常见原因与解决**:
@@ -86,7 +86,7 @@ ssh specflow "sudo certbot certificates"
 | Nginx 未启动 | `sudo systemctl start nginx` |
 | 配置语法错误 | `sudo nginx -t` 检查，修复后 `sudo systemctl reload nginx` |
 | 证书过期 | `sudo certbot renew` |
-| 防火墙未开放 | 腾讯云控制台检查 80/443 端口规则 |
+| 防火墙未开放 | 云控制台检查 80/443 端口规则 |
 
 ### 4. Docker 拉取镜像超时
 
@@ -95,8 +95,8 @@ ssh specflow "sudo certbot certificates"
 **排查**:
 
 ```bash
-ssh specflow "cat /etc/docker/daemon.json"
-ssh specflow "docker pull eclipse-temurin:21-jre"
+ssh {SSH_ALIAS} "cat /etc/docker/daemon.json"
+ssh {SSH_ALIAS} "docker pull eclipse-temurin:21-jre"
 ```
 
 **解决**: 更新镜像加速地址或直接用代理。
@@ -113,32 +113,32 @@ ssh specflow "docker pull eclipse-temurin:21-jre"
 
 ```bash
 # 最近 N 行
-ssh specflow "cd /srv/specflow-service/deploy && docker compose logs --tail={N} api"
+ssh {SSH_ALIAS} "cd {SERVICE_PATH}/deploy && docker compose logs --tail={N} api"
 
 # 实时跟踪
-ssh specflow "cd /srv/specflow-service/deploy && docker compose logs -f --tail=20 api"
+ssh {SSH_ALIAS} "cd {SERVICE_PATH}/deploy && docker compose logs -f --tail=20 api"
 
 # 只看错误
-ssh specflow "cd /srv/specflow-service/deploy && docker compose logs api 2>&1 | grep -i 'error\|exception'"
+ssh {SSH_ALIAS} "cd {SERVICE_PATH}/deploy && docker compose logs api 2>&1 | grep -i 'error\|exception'"
 
 # 按 TraceId 查询
-ssh specflow "cd /srv/specflow-service/deploy && docker compose logs api 2>&1 | grep '{traceId}'"
+ssh {SSH_ALIAS} "cd {SERVICE_PATH}/deploy && docker compose logs api 2>&1 | grep '{traceId}'"
 
 # 时间范围
-ssh specflow "cd /srv/specflow-service/deploy && docker compose logs --since '2h' api"
+ssh {SSH_ALIAS} "cd {SERVICE_PATH}/deploy && docker compose logs --since '2h' api"
 ```
 
 ### 数据库日志
 
 ```bash
-ssh specflow "cd /srv/specflow-service/deploy && docker compose logs --tail=50 postgres"
+ssh {SSH_ALIAS} "cd {SERVICE_PATH}/deploy && docker compose logs --tail=50 postgres"
 ```
 
 ### Nginx 日志
 
 ```bash
-ssh specflow "sudo tail -50 /var/log/nginx/access.log"
-ssh specflow "sudo tail -50 /var/log/nginx/error.log"
+ssh {SSH_ALIAS} "sudo tail -50 /var/log/nginx/access.log"
+ssh {SSH_ALIAS} "sudo tail -50 /var/log/nginx/error.log"
 ```
 
 ## 回滚流程
@@ -147,17 +147,17 @@ ssh specflow "sudo tail -50 /var/log/nginx/error.log"
 
 ```bash
 # 1. 查看历史版本
-ssh specflow "cd /srv/specflow-service && git log --oneline -10"
+ssh {SSH_ALIAS} "cd {SERVICE_PATH} && git log --oneline -10"
 
 # 2. 回滚到指定 commit
-ssh specflow "cd /srv/specflow-service && git checkout {commit-hash}"
+ssh {SSH_ALIAS} "cd {SERVICE_PATH} && git checkout {commit-hash}"
 
 # 3. 重新构建并部署
-ssh specflow "cd /srv/specflow-service/deploy && docker compose up -d --build"
+ssh {SSH_ALIAS} "cd {SERVICE_PATH}/deploy && docker compose up -d --build"
 
 # 4. 验证
-ssh specflow "cd /srv/specflow-service/deploy && docker compose ps"
-ssh specflow "curl -s http://localhost:8080/actuator/health"
+ssh {SSH_ALIAS} "cd {SERVICE_PATH}/deploy && docker compose ps"
+ssh {SSH_ALIAS} "curl -s http://localhost:{API_PORT}/actuator/health"
 ```
 
 ### 数据库回滚
@@ -166,23 +166,23 @@ Flyway 不支持自动 undo，需手动处理：
 
 ```bash
 # 1. 查看当前迁移状态
-ssh specflow "cd /srv/specflow-service/deploy && \
-  docker compose exec -T postgres psql -U specflow -d specflow \
+ssh {SSH_ALIAS} "cd {SERVICE_PATH}/deploy && \
+  docker compose exec -T postgres psql -U {DB_USER} -d {DB_NAME} \
   -c \"SELECT version, description, success FROM flyway_schema_history ORDER BY installed_rank;\""
 
 # 2. 先备份
-ssh specflow "cd /srv/specflow-service/deploy && \
-  docker compose exec -T postgres pg_dump -U specflow specflow > backup_before_rollback.sql"
+ssh {SSH_ALIAS} "cd {SERVICE_PATH}/deploy && \
+  docker compose exec -T postgres pg_dump -U {DB_USER} {DB_NAME} > backup_before_rollback.sql"
 
 # 3. 手动执行 undo SQL（需要人工编写）
-ssh specflow "cd /srv/specflow-service/deploy && \
-  docker compose exec -T postgres psql -U specflow -d specflow -c \"{undo_sql}\""
+ssh {SSH_ALIAS} "cd {SERVICE_PATH}/deploy && \
+  docker compose exec -T postgres psql -U {DB_USER} -d {DB_NAME} -c \"{undo_sql}\""
 
 # 4. 删除 Flyway 记录
-ssh specflow "cd /srv/specflow-service/deploy && \
-  docker compose exec -T postgres psql -U specflow -d specflow \
+ssh {SSH_ALIAS} "cd {SERVICE_PATH}/deploy && \
+  docker compose exec -T postgres psql -U {DB_USER} -d {DB_NAME} \
   -c \"DELETE FROM flyway_schema_history WHERE version = '{version}';\""
 
 # 5. 重启 API
-ssh specflow "cd /srv/specflow-service/deploy && docker compose restart api"
+ssh {SSH_ALIAS} "cd {SERVICE_PATH}/deploy && docker compose restart api"
 ```

@@ -15,11 +15,11 @@
 @BeforeEach
 void setUp() {
     // 使用 ReflectionTestUtils 手动注入
-    ReflectionTestUtils.setField(sessionService, "sessionExpirationDays", 30);
+    ReflectionTestUtils.setField(orderService, "orderExpirationDays", 30);
 }
 ```
 
-**实际案例**: `SessionServiceTest` 中 `sessionExpirationDays` 为 0，导致 `Session.create()` 创建的会话立即过期
+**实际案例**: `OrderServiceTest` 中 `orderExpirationDays` 为 0，导致 `Order.create()` 创建的会话立即过期
 
 ---
 
@@ -40,11 +40,11 @@ grep -r "getRevoked" --include="*.java" specflow-api/src/
 grep -r "isRevoked" --include="*.java" specflow-api/src/
 ```
 
-**影响范围**（Session 模块实际修改）:
-- `SessionService.java` (1 处)
-- `SessionConverter.java` (1 处)
-- `SessionResponse.java` (1 处)
-- `SessionServiceTest.java` (2 处)
+**影响范围**（Order 模块实际修改）:
+- `OrderService.java` (1 处)
+- `OrderConverter.java` (1 处)
+- `OrderResponse.java` (1 处)
+- `OrderServiceTest.java` (2 处)
 
 **最佳实践**: Domain Entity 优先使用 primitive boolean，避免 NPE 风险
 
@@ -67,8 +67,8 @@ LocalDateTime.now().atZone(ZoneId.of("UTC")).toInstant();
 
 **在 Converter 中**:
 ```java
-// SessionConverter.java
-public static Session toDomain(SessionDO dataObject) {
+// OrderConverter.java
+public static Session toDomain(OrderDO dataObject) {
     session.setExpiredAt(dataObject.getExpiredAt()
             .atZone(ZoneId.of("UTC")).toInstant());  // 明确 UTC
 }
@@ -85,9 +85,9 @@ public static Session toDomain(SessionDO dataObject) {
 **解决方案**:
 ```java
 // 方式 1: 在测试类上显式导入
-@WebMvcTest(SessionController.class)
+@WebMvcTest(OrderController.class)
 @Import(GlobalExceptionHandler.class)
-class SessionControllerTest { }
+class OrderControllerTest { }
 
 // 方式 2: 如果 GlobalExceptionHandler 在同一个包扫描路径下，
 // @WebMvcTest 会自动扫描 @ControllerAdvice（Spring Boot 默认行为）
@@ -100,19 +100,19 @@ class SessionControllerTest { }
 
 ## PITFALL-005: Mock void 方法
 
-**现象**: Service 的 void 方法（如 `revokeSession`）需要在异常场景中抛出异常，但 `when().thenThrow()` 语法不适用
+**现象**: Service 的 void 方法（如 `cancelOrder`）需要在异常场景中抛出异常，但 `when().thenThrow()` 语法不适用
 
 **根因**: `when(mock.method()).thenThrow()` 不适用于 void 方法
 
 **解决方案**:
 ```java
 // ✅ 正确：使用 doThrow
-doThrow(new NotFoundException("会话不存在"))
-        .when(sessionService).revokeSession(anyString());
+doThrow(new NotFoundException("订单不存在"))
+        .when(orderService).cancelOrder(anyString());
 
 // ❌ 错误：void 方法不能用 when().thenThrow()
-when(sessionService.revokeSession(anyString()))
-        .thenThrow(new NotFoundException("会话不存在"));
+when(orderService.cancelOrder(anyString()))
+        .thenThrow(new NotFoundException("订单不存在"));
 // 编译错误：when() 需要非 void 返回值
 ```
 
@@ -130,12 +130,12 @@ when(sessionService.revokeSession(anyString()))
 @BeforeEach
 void setUp() {
     // 每次都创建新的 mock 数据
-    mockSession = Session.create("user-123", "token_abc", 30);
+    mockOrder = Order.create("user-123", "token_abc", 30);
 }
 
 // ❌ 错误：在类级别共享可变对象
-private Session mockSession = Session.create("user-123", "token_abc", 30);
-// 如果某个测试调用了 mockSession.revoke()，其他测试也会受影响
+private Session mockOrder = Order.create("user-123", "token_abc", 30);
+// 如果某个测试调用了 mockOrder.revoke()，其他测试也会受影响
 ```
 
 ---
@@ -178,17 +178,17 @@ private String testUserId = "test-user-123";
 private String testToken = "token_abc123def456";
 
 @Test
-void getSession_shouldReturnSession() {
-    when(repo.findByToken(testToken)).thenReturn(Optional.of(mockSession));
-    Session result = service.getSessionByToken(testToken);
+void getOrder_shouldReturnOrder() {
+    when(repo.findByToken(testToken)).thenReturn(Optional.of(mockOrder));
+    Session result = service.getOrderById(testToken);
     assertThat(result.getUserId()).isEqualTo(testUserId);
 }
 
 // ❌ 错误：随意的值
 @Test
-void getSession_shouldReturnSession() {
+void getOrder_shouldReturnOrder() {
     when(repo.findByToken("abc")).thenReturn(Optional.of(session));
-    Session result = service.getSessionByToken("abc");
+    Session result = service.getOrderById("abc");
     assertThat(result.getUserId()).isEqualTo("u1");
 }
 ```
@@ -204,11 +204,11 @@ void getSession_shouldReturnSession() {
 // ✅ 正确：中文 DisplayName，失败时一眼看懂
 @Test
 @DisplayName("验证会话 - 会话已过期时应抛出认证异常")
-void validateSession_whenSessionIsExpired_shouldThrowAuthenticationException() { }
+void validateOrder_whenOrderIsExpired_shouldThrowBusinessException() { }
 
 // ❌ 错误：没有 DisplayName
 @Test
-void validateSession_whenSessionIsExpired_shouldThrowAuthenticationException() { }
+void validateOrder_whenOrderIsExpired_shouldThrowBusinessException() { }
 // 报告中只显示长长的方法名
 ```
 
@@ -221,14 +221,14 @@ void validateSession_whenSessionIsExpired_shouldThrowAuthenticationException() {
 **解决方案**:
 ```java
 @Test
-void createSession_shouldSaveToRepository() {
-    Session result = sessionService.createSession(testUserId);
+void createOrder_shouldSaveToRepository() {
+    Session result = orderService.createOrder(testUserId);
 
     // 不仅验证返回值
     assertThat(result).isNotNull();
 
     // 还要验证 Repository 被调用了
-    verify(sessionRepository).save(any(Session.class));
+    verify(orderRepository).save(any(Session.class));
 }
 ```
 

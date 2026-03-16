@@ -9,8 +9,8 @@
 ├── interfaces/                          # 接口层：Controller + DTOs
 │   ├── {Entity}Controller.java
 │   └── dto/
-│       ├── {Action}{Entity}Request.java  # 如 CreatePetRequest, UpdateUserRequest
-│       └── {Entity}Response.java         # 如 PetResponse, UserResponse
+│       ├── {Action}{Entity}Request.java  # 如 CreateOrderRequest, UpdateProductRequest
+│       └── {Entity}Response.java         # 如 OrderResponse, ProductResponse
 ├── application/                         # 应用层：Service（用例编排）
 │   └── {Entity}Service.java
 ├── domain/                              # 领域层：纯 POJO，无框架注解
@@ -63,7 +63,7 @@
 
 | 类别 | 规则 | 正确示例 |
 |------|------|---------|
-| 表名 | 蛇形复数 | `care_records`, `users`, `pets` |
+| 表名 | 蛇形复数 | `care_records`, `orders`, `products` |
 | 列名 | 蛇形 | `owner_id`, `created_at`, `deleted_at` |
 | 索引 | `idx_{table}_{column}` | `idx_care_records_owner_id` |
 | 唯一索引 | `idx_{table}_{column}` | `idx_users_email`（配合 WHERE）|
@@ -83,8 +83,6 @@
 |------|-------------|---------------|
 | 创建 | `Create{Entity}Request` 或 `Add{Entity}Request` | `{Entity}Response` |
 | 更新 | `Update{Entity}Request` | `{Entity}Response` |
-| 登录 | `LoginRequest` | `LoginResponse` |
-| 注册 | `RegisterRequest` | `UserResponse` |
 | 查询 | 无 Request 或 `Query{Entity}Request` | `{Entity}Response` |
 
 ## 集成点
@@ -97,10 +95,7 @@
 
 ```java
 private static final List<String> EXCLUDE_PATHS = List.of(
-        "/api/v1/users/register",
-        "/api/v1/users/login",
-        "/api/v1/sessions",
-        // 新增公开路径...
+        // 新增公开路径（不需要认证的接口）...
         "/actuator",
         "/swagger-ui",
         "/api-docs",
@@ -116,9 +111,8 @@ private static final List<String> EXCLUDE_PATHS = List.of(
 查看现有迁移文件最大版本号，新模块版本号递增：
 
 ```
-V1.0__create_session_table.sql      → auth 模块
-V1.1__create_user_and_pet_tables.sql → user 模块
-V1.2__create_{module}_tables.sql    → 新模块（版本号 +0.1）
+V1.0__create_initial_tables.sql      → 初始模块
+V1.1__create_{module}_tables.sql    → 新模块（版本号递增）
 ```
 
 ### 3. H2 测试 Schema
