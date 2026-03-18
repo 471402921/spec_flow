@@ -1,9 +1,11 @@
 # SpecFlow Service - 运维手册 (Runbook)
 
-> **服务器**: 腾讯云轻量应用服务器 4C8G，Ubuntu 24.04，IP `81.71.88.130`
-> **SSH**: `ssh specflow`（本地 `~/.ssh/config` 已配置，用户 `ubuntu`，密钥 `jet.pem`）
+> **服务器**: 云服务器（建议 4C8G+，Ubuntu 22.04/24.04）
+> **SSH**: `ssh <your-ssh-alias>`（需在本地 `~/.ssh/config` 配置）
 > **部署方式**: Docker Compose + Nginx 反向代理
-> **项目路径**: `/srv/specflow-service`
+> **项目路径**: `/srv/specflow-service`（可自定义）
+>
+> **Note**: 服务器 IP、SSH 别名等环境信息请维护在 `.claude/specflow-env.md`（已在 .gitignore 中），不要提交到仓库。
 
 ---
 
@@ -54,7 +56,7 @@ curl http://localhost:8080/actuator/health
 ### 1. 服务器初始化
 
 ```bash
-# 安装 Docker（国内服务器使用阿里云镜像源）
+# 安装 Docker（以下示例使用阿里云镜像源，海外服务器可直接使用官方源）
 sudo apt-get update -qq && sudo apt-get install -y -qq ca-certificates curl gnupg
 sudo install -m 0755 -d /etc/apt/keyrings
 curl -fsSL https://mirrors.aliyun.com/docker-ce/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
@@ -63,7 +65,7 @@ echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.
 sudo apt-get update -qq && sudo apt-get install -y -qq docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 sudo usermod -aG docker $USER
 
-# 配置 Docker Hub 镜像加速（国内服务器必需）
+# 配置 Docker Hub 镜像加速（国内服务器推荐，海外可跳过）
 sudo mkdir -p /etc/docker
 sudo tee /etc/docker/daemon.json > /dev/null <<EOF
 {
@@ -78,12 +80,12 @@ sudo systemctl daemon-reload && sudo systemctl restart docker
 # 克隆项目
 sudo mkdir -p /srv/specflow-service
 sudo chown $USER:$USER /srv/specflow-service
-git clone https://github.com/471402921/spec_flow.git /srv/specflow-service
+git clone <your-repo-url> /srv/specflow-service
 ```
 
-### 1.5 腾讯云防火墙配置
+### 1.5 云服务器防火墙配置
 
-在腾讯云控制台 → 实例 → 防火墙，添加以下规则：
+在云服务商控制台的防火墙/安全组中，添加以下规则：
 
 | 协议 | 端口 | 来源 | 备注 |
 |------|------|------|------|
@@ -194,7 +196,7 @@ curl -f http://localhost:8080/actuator/health
 
 ```bash
 # 从本地推送代码后，SSH 到服务器执行
-ssh specflow "cd /srv/specflow-service/deploy && bash deploy.sh"
+ssh <your-ssh-alias> "cd /srv/specflow-service/deploy && bash deploy.sh"
 ```
 
 `deploy.sh` 会自动执行：

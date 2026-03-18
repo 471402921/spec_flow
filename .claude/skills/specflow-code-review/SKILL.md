@@ -1,6 +1,6 @@
 ---
 name: specflow-code-review
-description: SpecFlow Service 项目代码审核技能 - 像高级软件架构师一样检查代码的 DDD Light 架构合规性、Spring Boot 最佳实践、Java 类型安全和安全性。当用户请求代码审核(review, code review, 代码审核, 审查代码, 检查代码, 帮我审核, review this, review my changes, 审核这个模块, 检查架构合规性)时触发此技能。
+description: SpecFlow Service 项目代码审核技能 - 像高级软件架构师一样检查代码的 DDD Light 架构合规性、Spring Boot 最佳实践、Java 类型安全和安全性。当用户请求代码审核(code review, 代码审核, 审查代码, 检查代码, review code, review my code, review my changes, 审核代码, 审核这个模块, 检查架构合规性)时触发此技能。注意：单独的 "review" 不应触发此技能，需要有"代码/code/changes/模块"等上下文才触发。
 ---
 
 # SpecFlow Service 代码审核

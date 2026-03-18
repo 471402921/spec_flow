@@ -31,11 +31,11 @@ SpecFlow is a **Spec-Driven / Agentic Engineering** development framework — an
 ./mvnw clean test jacoco:report
 ```
 
-> Note: 本地开发环境未配置 Java 21，构建和测试在服务器 Docker 中完成。
+> Note: 需要 Java 21 运行环境。构建和测试可在本地或 Docker 中完成。
 
 ## Architecture: DDD Light Modular Monolith
 
-Java 21 + Spring Boot 3.4.2 + Maven multi-module. Three modules: `specflow-api` (REST service), `specflow-worker` (async tasks, placeholder), `specflow-common` (shared code).
+Java 21 + Spring Boot 3.4.2 + Maven multi-module. Three modules: `specflow-api` (REST service), `specflow-worker` (async tasks, **placeholder — 当前不接受业务代码，未来用于异步任务处理**), `specflow-common` (shared code).
 
 ### Shared Infrastructure
 
@@ -90,10 +90,10 @@ infrastructure/      # Repository impls, DO classes (MyBatis-Plus @TableName), c
 
 - Docker Compose in `deploy/`: postgres:16, redis:7-alpine, api
 - Deploy script: `deploy/deploy.sh` (git pull → compose down → rebuild → health check)
-- Server: 腾讯云轻量应用服务器, SSH alias `specflow`
 - HTTPS via Nginx + Let's Encrypt (see `deploy/RUNBOOK.md`)
 - Docker services use healthcheck dependencies (api waits for postgres + redis to be healthy)
 - Operational runbook: `deploy/RUNBOOK.md`
+- Server-specific config (SSH alias, cloud provider) should be maintained in user's local memory, not in this file
 
 ## Testing Conventions
 
@@ -121,4 +121,23 @@ Custom skills available via slash commands:
 
 ## Development Workflow
 
-The project follows a 4-stage AI-automation workflow documented in `doc/README.md`: PRD-Lite → Tech Pack → Implementation → Review. Requirements live in `doc/requirements/`, designs in `doc/design/{module}/`.
+The project follows a 4-stage AI-automation workflow: PRD-Lite → Tech Pack → Implementation → Review. Requirements live in `doc/requirements/`, designs in `doc/design/{module}/`.
+
+### Skills 调用约束
+
+每个 Skill 有明确的前置条件，**必须由用户明确指令触发，禁止自动串联执行**。
+
+| 阶段 | Skill | 前置条件 |
+|------|-------|---------|
+| 1. 需求 | `/specflow-doc-prd` | 用户提供需求描述或草稿 |
+| 2. 设计 | `/specflow-doc-techpack` | 对应 PRD 已**定稿**（用户确认） |
+| 3. 实现 | `/specflow-module-gen` | 对应 Tech Pack 已**定稿**（用户确认） |
+| 4. 测试 | `/specflow-test-gen` | 模块代码已生成且可编译 |
+| 5. 审核 | `/specflow-code-review` | 模块代码已完成（含测试） |
+| 6. 文档审核 | `/specflow-doc-review` | 至少有一份 PRD 或 Tech Pack 存在 |
+| 7. 部署 | `/specflow-deploy` | 代码已合并到部署分支，构建通过 |
+
+**关键原则**：
+- **不跨阶段**：没有定稿 PRD 不得生成 Tech Pack，没有定稿 Tech Pack 不得生成模块代码
+- **不自动推进**：完成一个阶段后，等待用户指令，不主动建议或执行下一阶段
+- **稳定优先**：每个阶段的产出必须经用户确认后才能作为下一阶段的输入
